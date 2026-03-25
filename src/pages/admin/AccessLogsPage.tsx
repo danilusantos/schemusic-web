@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { adminService } from '../../services/adminService';
 import type { AdminAccessLog } from '../../types/admin';
+import { ListIcon, ArrowUpIcon } from '../../icons';
+import { AdminCardContextMenu } from '../../components/admin/AdminCardContextMenu';
 
 const formatDate = (value: string) => {
   if (!value) {
@@ -18,19 +20,15 @@ const formatDate = (value: string) => {
 export const AccessLogsPage = () => {
   const [logs, setLogs] = useState<AdminAccessLog[]>([]);
   const [limite, setLimite] = useState(50);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   const carregar = async (limit = limite) => {
-    setLoading(true);
     setError('');
     try {
       const data = await adminService.listarLogs(limit);
       setLogs(data);
     } catch {
       setError('Falha ao carregar logs de acesso.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -39,130 +37,127 @@ export const AccessLogsPage = () => {
   }, []);
 
   const getStatusColor = (status: number) => {
-    if (status >= 200 && status < 300) return 'bg-green-100 text-green-800';
-    if (status >= 300 && status < 400) return 'bg-blue-100 text-blue-800';
-    if (status >= 400 && status < 500) return 'bg-yellow-100 text-yellow-800';
-    return 'bg-red-100 text-red-800';
+    if (status >= 200 && status < 300) return 'bg-burnt/15 text-burnt-dark';
+    if (status >= 300 && status < 400) return 'bg-warm-100 text-warm-800';
+    if (status >= 400 && status < 500) return 'bg-warm-200 text-warm-900';
+    return 'bg-warm-300 text-warm-900';
   };
 
   const getMethodColor = (method: string) => {
     const colors: Record<string, string> = {
-      GET: 'bg-blue-100 text-blue-800',
-      POST: 'bg-green-100 text-green-800',
-      PUT: 'bg-orange-100 text-orange-800',
-      DELETE: 'bg-red-100 text-red-800',
-      NAVIGATE: 'bg-purple-100 text-purple-800',
+      GET: 'bg-warm-100 text-warm-900',
+      POST: 'bg-burnt/15 text-burnt-dark',
+      PUT: 'bg-warm-200 text-warm-900',
+      DELETE: 'bg-warm-300 text-warm-900',
+      NAVIGATE: 'bg-burnt/20 text-burnt-dark',
     };
-    return colors[method] || 'bg-gray-100 text-gray-700';
+    return colors[method] || 'bg-warm-100 text-warm-700';
   };
+
+  let logsContent;
+  if (logs.length === 0) {
+    logsContent = (
+      <div className="py-xl text-center"><p className="text-warm-700">Nenhum log encontrado</p></div>
+    );
+  } else {
+    logsContent = (
+      <div className="ds-table-wrap">
+        <table className="ds-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Metodo</th>
+              <th>Caminho</th>
+              <th>IP</th>
+              <th>User ID</th>
+              <th>Status</th>
+              <th>Data/Hora</th>
+            </tr>
+          </thead>
+          <tbody>
+            {logs.map((log) => (
+              <tr key={log.idAcesso}>
+                <td className="font-mono text-xs">{log.idAcesso}</td>
+                <td>
+                  <span className={`inline-block px-md py-xs rounded-full text-xs font-semibold ${getMethodColor(log.metodo)}`}>
+                    {log.metodo}
+                  </span>
+                </td>
+                <td className="max-w-xs truncate font-mono text-xs text-warm-700" title={log.caminho}>
+                  {log.caminho}
+                </td>
+                <td className="font-mono text-xs text-warm-900">{log.ip}</td>
+                <td className="font-mono text-xs text-warm-700">{log.userId || '-'}</td>
+                <td>
+                  <span className={`inline-block px-md py-xs rounded-full text-xs font-semibold ${getStatusColor(log.statusHttp)}`}>
+                    {log.statusHttp}
+                  </span>
+                </td>
+                <td className="whitespace-nowrap text-xs text-warm-700">
+                  {formatDate(log.dataAcesso)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
 
   return (
     <section className="ds-page">
-      {/* Header */}
-      <div className="space-y-md">
-        <h1 className="ds-page-title">
-          Logs de Acesso
-        </h1>
-        <p className="ds-page-subtitle">
-          Auditoria completa de requisicoes HTTP e navegacao frontend em tempo real.
-        </p>
-      </div>
-
-      {/* Error message */}
       {error && (
-        <div className="ds-alert-error">
+        <div className="ds-alert-error mb-md">
           <p className="text-sm">{error}</p>
         </div>
       )}
 
-      {/* Filter Bar */}
-      <div className="ds-card flex gap-md items-end">
-        <div className="flex-1 max-w-xs">
-          <label htmlFor="limite" className="ds-label">
-            Mostrar ultimos
-          </label>
-          <div className="flex gap-md">
-            <input
-              id="limite"
-              type="number"
-              min={1}
-              max={500}
-              value={limite}
-              onChange={(e) => setLimite(Number(e.target.value))}
-              className="ds-input flex-1"
-            />
-            <button
-              type="button"
-              onClick={() => void carregar()}
-              className="ds-btn-primary"
-            >
-              Atualizar
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Logs Table */}
       <div className="ds-card space-y-lg">
-        <div>
-          <h2 className="ds-card-title">
-            Ultimos Acessos
-          </h2>
-          <p className="text-sm text-warm-600 mt-xs">
-            {loading ? 'Carregando...' : `Exibindo ${logs.length} registro(s)`}
-          </p>
+        <div className="flex items-start justify-between gap-md">
+          <div className="flex items-center gap-2">
+            <ListIcon className="h-5 w-5 text-burnt" />
+            <h2 className="ds-card-title">Ultimos Acessos</h2>
+          </div>
+
+          <AdminCardContextMenu
+            items={[
+              {
+                label: 'Atualizar agora',
+                icon: <ArrowUpIcon className="h-4 w-4 text-burnt" />,
+                onClick: () => {
+                  void carregar();
+                },
+              },
+            ]}
+          />
         </div>
 
-        {loading ? (
-          <div className="py-xl text-center">
-            <p className="text-warm-700">Carregando dados...</p>
+        <div className="flex flex-wrap items-end justify-between gap-md">
+          <div className="w-full max-w-xs">
+            <label htmlFor="limite" className="ds-label">Mostrar ultimos</label>
+            <div className="flex gap-md">
+              <input
+                id="limite"
+                type="number"
+                min={1}
+                max={500}
+                value={limite}
+                onChange={(e) => setLimite(Number(e.target.value))}
+                className="ds-input flex-1"
+              />
+              <button
+                type="button"
+                onClick={() => void carregar()}
+                className="ds-btn-primary"
+              >
+                Atualizar
+              </button>
+            </div>
           </div>
-        ) : logs.length === 0 ? (
-          <div className="py-xl text-center">
-            <p className="text-warm-700">Nenhum log encontrado</p>
-          </div>
-        ) : (
-          <div className="ds-table-wrap">
-            <table className="ds-table">
-              <thead>
-                <tr className="border-b-2 border-warm-300 bg-warm-50">
-                  <th className="px-lg py-md text-left font-semibold text-warm-800">ID</th>
-                  <th className="px-lg py-md text-left font-semibold text-warm-800">Metodo</th>
-                  <th className="px-lg py-md text-left font-semibold text-warm-800">Caminho</th>
-                  <th className="px-lg py-md text-left font-semibold text-warm-800">IP</th>
-                  <th className="px-lg py-md text-left font-semibold text-warm-800">User ID</th>
-                  <th className="px-lg py-md text-left font-semibold text-warm-800">Status</th>
-                  <th className="px-lg py-md text-left font-semibold text-warm-800">Data/Hora</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-warm-300">
-                {logs.map((log) => (
-                  <tr key={log.idAcesso} className="hover:bg-warm-50 transition-colors">
-                    <td className="px-lg py-md text-warm-900 font-mono text-xs">{log.idAcesso}</td>
-                    <td className="px-lg py-md">
-                      <span className={`inline-block px-md py-xs rounded-full text-xs font-semibold ${getMethodColor(log.metodo)}`}>
-                        {log.metodo}
-                      </span>
-                    </td>
-                    <td className="px-lg py-md text-warm-700 font-mono text-xs truncate max-w-xs" title={log.caminho}>
-                      {log.caminho}
-                    </td>
-                    <td className="px-lg py-md text-warm-900 font-mono text-xs">{log.ip}</td>
-                    <td className="px-lg py-md text-warm-700 font-mono text-xs">{log.userId || '-'}</td>
-                    <td className="px-lg py-md">
-                      <span className={`inline-block px-md py-xs rounded-full text-xs font-semibold ${getStatusColor(log.statusHttp)}`}>
-                        {log.statusHttp}
-                      </span>
-                    </td>
-                    <td className="px-lg py-md text-warm-700 text-xs whitespace-nowrap">
-                      {formatDate(log.dataAcesso)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+          <p className="w-full text-sm text-warm-600 sm:w-auto">Exibindo {logs.length} registro(s)</p>
+        </div>
+
+        {logsContent}
       </div>
     </section>
   );

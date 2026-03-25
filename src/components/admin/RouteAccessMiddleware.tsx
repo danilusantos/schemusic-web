@@ -17,7 +17,7 @@ export const RouteAccessMiddleware = () => {
 
     void adminService.registrarNavegacaoFrontend({
       rota: rotaAtual,
-      origem: window.location.origin,
+      origem: globalThis.location.origin,
       userAgent: navigator.userAgent,
     }).catch(() => {
       // O middleware nao deve quebrar a navegacao caso o log falhe.

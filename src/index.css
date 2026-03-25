@@ -79,7 +79,7 @@
   }
 
   .ds-table-wrap {
-    @apply overflow-x-auto;
+    @apply overflow-x-auto rounded-xl border border-warm-300 bg-white;
   }
 
   .ds-table {
@@ -91,15 +91,15 @@
   }
 
   .ds-table th {
-    @apply px-4 py-3 text-left font-semibold text-warm-800;
+    @apply px-5 py-3.5 text-left font-semibold text-warm-800;
   }
 
   .ds-table td {
-    @apply px-4 py-3 text-warm-700;
+    @apply px-5 py-3.5 text-warm-700;
   }
 
   .ds-table tbody tr {
-    @apply border-b border-warm-200 hover:bg-warm-50;
+    @apply border-b border-warm-200 hover:bg-warm-50 transition-colors;
   }
 
   .ds-kpi {

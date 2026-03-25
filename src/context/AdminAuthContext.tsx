@@ -14,6 +14,7 @@ interface AdminAuthContextType {
   isAuthenticated: boolean;
   login: (email: string, senha: string) => Promise<void>;
   logout: () => void;
+  updateSessionLanguage: (idiomaPadrao: 'pt-BR' | 'en-US' | 'es-ES') => void;
 }
 
 const STORAGE_KEY = 'schemusic_admin_session';
@@ -50,14 +51,31 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
     setSession(null);
   }, []);
 
+  const updateSessionLanguage = useCallback((idiomaPadrao: 'pt-BR' | 'en-US' | 'es-ES') => {
+    setSession((current) => {
+      if (!current) {
+        return current;
+      }
+
+      const updatedSession = {
+        ...current,
+        idiomaPadrao,
+      };
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedSession));
+      return updatedSession;
+    });
+  }, []);
+
   const value = useMemo(
     () => ({
       session,
       isAuthenticated: Boolean(session?.token),
       login,
       logout,
+      updateSessionLanguage,
     }),
-    [login, logout, session],
+    [login, logout, session, updateSessionLanguage],
   );
 
   return <AdminAuthContext.Provider value={value}>{children}</AdminAuthContext.Provider>;

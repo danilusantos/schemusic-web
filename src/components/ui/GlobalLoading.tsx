@@ -13,7 +13,7 @@ export const GlobalLoading = () => {
   useEffect(() => {
     if (isLoading) {
       if (hideTimeoutRef.current) {
-        window.clearTimeout(hideTimeoutRef.current);
+        globalThis.clearTimeout(hideTimeoutRef.current);
         hideTimeoutRef.current = null;
       }
 
@@ -35,9 +35,9 @@ export const GlobalLoading = () => {
     const elapsed = Date.now() - (startedAtRef.current ?? Date.now());
     const remaining = Math.max(0, MIN_LOADING_MS - elapsed);
 
-    hideTimeoutRef.current = window.setTimeout(() => {
+    hideTimeoutRef.current = globalThis.setTimeout(() => {
       setIsVisible(false);
-      window.setTimeout(() => {
+      globalThis.setTimeout(() => {
         setShouldRender(false);
         startedAtRef.current = null;
       }, 220);
@@ -46,7 +46,7 @@ export const GlobalLoading = () => {
 
     return () => {
       if (hideTimeoutRef.current) {
-        window.clearTimeout(hideTimeoutRef.current);
+        globalThis.clearTimeout(hideTimeoutRef.current);
         hideTimeoutRef.current = null;
       }
     };
@@ -62,9 +62,8 @@ export const GlobalLoading = () => {
         isVisible ? 'bg-white/70 opacity-100' : 'pointer-events-none bg-white/0 opacity-0'
       }`}
     >
-      <div className="flex items-center gap-3 rounded-lg border border-warm-300 bg-white px-4 py-3 shadow-lg">
-        <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-warm-300 border-t-burnt" />
-        <span className="text-sm font-semibold text-warm-800">Carregando...</span>
+      <div className="flex items-center gap-3">
+        <span className="inline-block h-20 w-20 animate-spin rounded-full border-8 border-warm-300 border-t-burnt" />
       </div>
     </div>
   );

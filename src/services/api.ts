@@ -27,6 +27,38 @@ api.interceptors.request.use((config) => {
 });
 
 api.interceptors.response.use((response) => {
+  const refreshedTokenHeader = response.headers['x-refreshed-token'];
+  if (typeof refreshedTokenHeader === 'string' && refreshedTokenHeader.trim()) {
+    const refreshedToken = refreshedTokenHeader.trim();
+    localStorage.setItem('token', refreshedToken);
+
+    const adminSessionRaw = localStorage.getItem('schemusic_admin_session');
+    if (adminSessionRaw) {
+      try {
+        const adminSession = JSON.parse(adminSessionRaw) as Record<string, unknown>;
+        localStorage.setItem('schemusic_admin_session', JSON.stringify({
+          ...adminSession,
+          token: refreshedToken,
+        }));
+      } catch {
+        localStorage.removeItem('schemusic_admin_session');
+      }
+    }
+
+    const publicUserRaw = localStorage.getItem('user');
+    if (publicUserRaw) {
+      try {
+        const publicUser = JSON.parse(publicUserRaw) as Record<string, unknown>;
+        localStorage.setItem('user', JSON.stringify({
+          ...publicUser,
+          token: refreshedToken,
+        }));
+      } catch {
+        localStorage.removeItem('user');
+      }
+    }
+  }
+
   stopLoading();
   return response;
 }, (error) => {

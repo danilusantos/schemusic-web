@@ -1,7 +1,10 @@
-import { useEffect, useState } from 'react';
-import type { FormEvent } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import type * as React from 'react';
 import { adminService } from '../../services/adminService';
 import type { AdminAccessList } from '../../types/admin';
+import { ListIcon, PlusIcon, TrashIcon } from '../../icons';
+import { AdminModal } from '../../components/admin/AdminModal';
+import { AdminCardContextMenu } from '../../components/admin/AdminCardContextMenu';
 
 export const AccessListsPage = () => {
   const [listas, setListas] = useState<AdminAccessList[]>([]);
@@ -10,29 +13,46 @@ export const AccessListsPage = () => {
   const [valorAlvo, setValorAlvo] = useState('');
   const [observacao, setObservacao] = useState('');
   const [ativo, setAtivo] = useState(true);
+
+  const [search, setSearch] = useState('');
+  const [listaFilter, setListaFilter] = useState<'TODAS' | 'WHITELIST' | 'BLACKLIST'>('TODAS');
+  const [statusFilter, setStatusFilter] = useState<'TODOS' | 'ATIVOS' | 'INATIVOS'>('TODOS');
+
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(true);
+
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCreateLoading, setIsCreateLoading] = useState(false);
+  const [createError, setCreateError] = useState('');
 
   const carregar = async () => {
-    setLoading(true);
     setError('');
+
+    const tipoListaParam = listaFilter === 'TODAS' ? undefined : listaFilter;
+    const ativoParam =
+      statusFilter === 'TODOS'
+        ? undefined
+        : statusFilter === 'ATIVOS';
+
     try {
-      const data = await adminService.listarListasAcesso();
+      const data = await adminService.listarListasAcesso({
+        tipoLista: tipoListaParam,
+        ativo: ativoParam,
+      });
       setListas(data);
     } catch {
       setError('Falha ao carregar listas de acesso.');
-    } finally {
-      setLoading(false);
     }
   };
 
   useEffect(() => {
     void carregar();
-  }, []);
+  }, [listaFilter, statusFilter]);
 
-  const criarItem = async (event: FormEvent<HTMLFormElement>) => {
+  const criarItem = async (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError('');
+    setCreateError('');
+    setIsCreateLoading(true);
+
     try {
       await adminService.criarListaAcesso({
         tipoLista,
@@ -44,9 +64,12 @@ export const AccessListsPage = () => {
       setValorAlvo('');
       setObservacao('');
       setAtivo(true);
+      setIsCreateModalOpen(false);
       await carregar();
     } catch {
-      setError('Nao foi possivel criar item de lista de acesso.');
+      setCreateError('Nao foi possivel criar item de lista de acesso.');
+    } finally {
+      setIsCreateLoading(false);
     }
   };
 
@@ -59,47 +82,171 @@ export const AccessListsPage = () => {
     }
   };
 
+  const filteredListas = useMemo(() => {
+    const termo = search.trim().toLowerCase();
+    if (!termo) {
+      return listas;
+    }
+
+    return listas.filter((item) =>
+      item.valorAlvo.toLowerCase().includes(termo)
+      || (item.observacao ?? '').toLowerCase().includes(termo)
+      || item.tipoAlvo.toLowerCase().includes(termo),
+    );
+  }, [listas, search]);
+
+  let listasContent;
+  if (filteredListas.length === 0) {
+    listasContent = (
+      <div className="py-xl text-center"><p className="text-warm-700">Nenhum item encontrado</p></div>
+    );
+  } else {
+    listasContent = (
+      <div className="ds-table-wrap">
+        <table className="ds-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Lista</th>
+              <th>Tipo</th>
+              <th>Valor</th>
+              <th>Observacao</th>
+              <th>Status</th>
+              <th className="text-center">Acoes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredListas.map((item) => (
+              <tr key={item.idListaAcesso}>
+                <td className="font-mono text-xs">{item.idListaAcesso}</td>
+                <td>
+                  <span className={[
+                    'inline-block rounded-full px-md py-xs text-xs font-semibold',
+                    item.tipoLista === 'WHITELIST' ? 'bg-burnt/15 text-burnt-dark' : 'bg-warm-100 text-warm-800',
+                  ].join(' ')}>
+                    {item.tipoLista}
+                  </span>
+                </td>
+                <td className="font-semibold text-warm-900">{item.tipoAlvo}</td>
+                <td className="max-w-xs truncate font-mono text-xs text-warm-700">{item.valorAlvo}</td>
+                <td className="text-xs text-warm-700">{item.observacao || '-'}</td>
+                <td>
+                  <span className={[
+                    'inline-block rounded-full px-md py-xs text-xs font-semibold',
+                    item.ativo ? 'bg-burnt/15 text-burnt-dark' : 'bg-warm-100 text-warm-700',
+                  ].join(' ')}>
+                    {item.ativo ? 'Ativo' : 'Inativo'}
+                  </span>
+                </td>
+                <td className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => inativarItem(item.idListaAcesso)}
+                    disabled={!item.ativo}
+                    className="inline-flex items-center gap-1 rounded-md bg-burnt px-md py-xs text-xs font-semibold text-white transition-colors hover:bg-burnt-dark disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <TrashIcon className="h-4 w-4" />
+                    Inativar
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
   return (
     <section className="ds-page">
-      {/* Header */}
-      <div className="space-y-md">
-        <h1 className="ds-page-title">
-          Listas de Acesso
-        </h1>
-        <p className="ds-page-subtitle">
-          Controle regras de whitelist e blacklist para IP, email, dominio e usuarios.
-        </p>
-      </div>
-
-      {/* Error message */}
       {error && (
-        <div className="ds-alert-error">
+        <div className="ds-alert-error mb-md">
           <p className="text-sm">{error}</p>
         </div>
       )}
 
-      {/* Create Access List Form */}
-      <div className="ds-card space-y-lg max-w-2xl">
-        <div>
-          <h2 className="ds-card-title">
-            Novo Item de Acesso
-          </h2>
-          <p className="ds-card-subtitle">
-            Adicione regra de whitelist ou blacklist
-          </p>
+      <div className="ds-card space-y-lg">
+        <div className="flex items-start justify-between gap-md">
+          <div className="flex items-center gap-2">
+            <ListIcon className="h-5 w-5 text-burnt" />
+            <h2 className="ds-card-title">Itens Cadastrados</h2>
+          </div>
+
+          <AdminCardContextMenu
+            items={[
+              {
+                label: 'Novo Item de Acesso',
+                icon: <PlusIcon className="h-4 w-4 text-burnt" />,
+                onClick: () => setIsCreateModalOpen(true),
+              },
+            ]}
+          />
         </div>
 
+        <div className="flex flex-wrap items-end justify-between gap-md">
+          <div className="grid w-full gap-md sm:w-auto sm:grid-cols-3">
+            <div>
+              <label htmlFor="listas-lista-filter" className="ds-label">Lista</label>
+              <select
+                id="listas-lista-filter"
+                className="ds-select min-w-[160px]"
+                value={listaFilter}
+                onChange={(event) => setListaFilter(event.target.value as 'TODAS' | 'WHITELIST' | 'BLACKLIST')}
+              >
+                <option value="TODAS">Todas</option>
+                <option value="WHITELIST">Whitelist</option>
+                <option value="BLACKLIST">Blacklist</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="listas-status-filter" className="ds-label">Status</label>
+              <select
+                id="listas-status-filter"
+                className="ds-select min-w-[160px]"
+                value={statusFilter}
+                onChange={(event) => setStatusFilter(event.target.value as 'TODOS' | 'ATIVOS' | 'INATIVOS')}
+              >
+                <option value="TODOS">Todos</option>
+                <option value="ATIVOS">Ativos</option>
+                <option value="INATIVOS">Inativos</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="listas-search-filter" className="ds-label">Buscar</label>
+              <input
+                id="listas-search-filter"
+                type="text"
+                className="ds-input min-w-[220px]"
+                placeholder="Buscar por valor, alvo ou observacao"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+              />
+            </div>
+          </div>
+          <p className="w-full text-sm text-warm-600 sm:w-auto">Total: {filteredListas.length} item(s)</p>
+        </div>
+
+        {listasContent}
+      </div>
+
+      <AdminModal
+        isOpen={isCreateModalOpen}
+        title="Novo Item de Acesso"
+        subtitle="Adicione regra de whitelist ou blacklist"
+        onClose={() => setIsCreateModalOpen(false)}
+        isLoading={isCreateLoading}
+        error={createError}
+      >
         <form onSubmit={criarItem} className="space-y-lg">
           <div className="grid grid-cols-2 gap-md">
             <div>
-              <label htmlFor="lista-tipo" className="ds-label">
-                Tipo de Lista
-              </label>
+              <label htmlFor="lista-tipo" className="ds-label">Tipo de Lista</label>
               <select
                 id="lista-tipo"
                 value={tipoLista}
                 onChange={(e) => setTipoLista(e.target.value)}
-                className="ds-select"
+                disabled={isCreateLoading}
+                className="ds-select disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <option value="WHITELIST">WHITELIST</option>
                 <option value="BLACKLIST">BLACKLIST</option>
@@ -107,14 +254,13 @@ export const AccessListsPage = () => {
             </div>
 
             <div>
-              <label htmlFor="lista-alvo" className="ds-label">
-                Tipo Alvo
-              </label>
+              <label htmlFor="lista-alvo" className="ds-label">Tipo Alvo</label>
               <select
                 id="lista-alvo"
                 value={tipoAlvo}
                 onChange={(e) => setTipoAlvo(e.target.value)}
-                className="ds-select"
+                disabled={isCreateLoading}
+                className="ds-select disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <option value="IP">IP</option>
                 <option value="EMAIL">EMAIL</option>
@@ -125,130 +271,52 @@ export const AccessListsPage = () => {
           </div>
 
           <div>
-            <label htmlFor="lista-valor" className="ds-label">
-              Valor Alvo
-            </label>
+            <label htmlFor="lista-valor" className="ds-label">Valor Alvo</label>
             <input
               id="lista-valor"
               type="text"
               value={valorAlvo}
               onChange={(e) => setValorAlvo(e.target.value)}
               required
-              className="ds-input"
+              disabled={isCreateLoading}
+              className="ds-input disabled:cursor-not-allowed disabled:opacity-60"
               placeholder={tipoAlvo === 'IP' ? 'Ex: 192.168.1.1' : 'Ex: usuario@exemplo.com'}
             />
           </div>
 
           <div>
-            <label htmlFor="lista-obs" className="ds-label">
-              Observacao
-            </label>
+            <label htmlFor="lista-obs" className="ds-label">Observacao</label>
             <input
               id="lista-obs"
               type="text"
               value={observacao}
               onChange={(e) => setObservacao(e.target.value)}
-              className="ds-input"
+              disabled={isCreateLoading}
+              className="ds-input disabled:cursor-not-allowed disabled:opacity-60"
               placeholder="Ex: Api externa de teste"
             />
           </div>
 
-          <label className="flex items-center gap-md cursor-pointer">
+          <label className="flex cursor-pointer items-center gap-md">
             <input
               type="checkbox"
               checked={ativo}
               onChange={(e) => setAtivo(e.target.checked)}
-              className="w-4 h-4 accent-burnt"
+              disabled={isCreateLoading}
+              className="h-4 w-4 accent-burnt disabled:cursor-not-allowed"
             />
-            <span className="text-sm font-semibold text-warm-800">
-              Item ativo
-            </span>
+            <span className="text-sm font-semibold text-warm-800">Item ativo</span>
           </label>
 
           <button
             type="submit"
-            className="ds-btn-primary w-full"
+            disabled={isCreateLoading}
+            className="ds-btn-primary w-full disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Criar Item
+            {isCreateLoading ? 'Carregando...' : 'Criar Item'}
           </button>
         </form>
-      </div>
-
-      {/* Access Lists Table */}
-      <div className="ds-card space-y-lg">
-        <div>
-          <h2 className="ds-card-title">
-            Itens Cadastrados
-          </h2>
-          <p className="text-sm text-warm-600 mt-xs">
-            {loading ? 'Carregando...' : `Total: ${listas.length} item(s)`}
-          </p>
-        </div>
-
-        {loading ? (
-          <div className="py-xl text-center">
-            <p className="text-warm-700">Carregando dados...</p>
-          </div>
-        ) : listas.length === 0 ? (
-          <div className="py-xl text-center">
-            <p className="text-warm-700">Nenhum item encontrado</p>
-          </div>
-        ) : (
-          <div className="ds-table-wrap">
-            <table className="ds-table">
-              <thead>
-                <tr className="border-b-2 border-warm-300 bg-warm-50">
-                  <th className="px-lg py-md text-left font-semibold text-warm-800">ID</th>
-                  <th className="px-lg py-md text-left font-semibold text-warm-800">Lista</th>
-                  <th className="px-lg py-md text-left font-semibold text-warm-800">Tipo</th>
-                  <th className="px-lg py-md text-left font-semibold text-warm-800">Valor</th>
-                  <th className="px-lg py-md text-left font-semibold text-warm-800">Observacao</th>
-                  <th className="px-lg py-md text-left font-semibold text-warm-800">Status</th>
-                  <th className="px-lg py-md text-center font-semibold text-warm-800">Acoes</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-warm-300">
-                {listas.map((item) => (
-                  <tr key={item.idListaAcesso} className="hover:bg-warm-50 transition-colors">
-                    <td className="px-lg py-md text-warm-900 font-mono text-xs">{item.idListaAcesso}</td>
-                    <td className="px-lg py-md">
-                      <span className={`inline-block px-md py-xs rounded-full text-xs font-semibold ${
-                        item.tipoLista === 'WHITELIST'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {item.tipoLista}
-                      </span>
-                    </td>
-                    <td className="px-lg py-md text-warm-900 font-semibold">{item.tipoAlvo}</td>
-                    <td className="px-lg py-md text-warm-700 font-mono text-xs truncate max-w-xs">{item.valorAlvo}</td>
-                    <td className="px-lg py-md text-warm-700 text-xs">{item.observacao || '-'}</td>
-                    <td className="px-lg py-md">
-                      <span className={`inline-block px-md py-xs rounded-full text-xs font-semibold ${
-                        item.ativo
-                          ? 'bg-emerald-100 text-emerald-800'
-                          : 'bg-gray-100 text-gray-700'
-                      }`}>
-                        {item.ativo ? 'Ativo' : 'Inativo'}
-                      </span>
-                    </td>
-                    <td className="px-lg py-md text-center">
-                      <button
-                        type="button"
-                        onClick={() => inativarItem(item.idListaAcesso)}
-                        disabled={!item.ativo}
-                        className="px-md py-xs bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-md transition-colors"
-                      >
-                        Inativar
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      </AdminModal>
     </section>
   );
 };

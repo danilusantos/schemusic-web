@@ -2,7 +2,9 @@ import api from './api';
 import type {
   AdminAccessList,
   AdminAccessLog,
+  AdminAccessSeriesResponse,
   AdminAuthResponse,
+  AdminDashboardSummary,
   AdminRole,
   AdminSystemConfig,
   AdminUser,
@@ -12,6 +14,7 @@ export interface AdminUserPayload {
   nome: string;
   email: string;
   senha: string;
+  idiomaPadrao?: 'pt-BR' | 'en-US' | 'es-ES';
 }
 
 export interface AdminRolePayload {
@@ -58,8 +61,13 @@ export const adminService = {
     };
   },
 
-  listarUsuarios: async () => {
-    const response = await api.get<AdminUser[]>('/administration/users');
+  listarUsuarios: async (ativo?: boolean, termo?: string) => {
+    const response = await api.get<AdminUser[]>('/administration/users', {
+      params: {
+        ativo,
+        termo,
+      },
+    });
     return response.data;
   },
 
@@ -75,6 +83,17 @@ export const adminService = {
 
   inativarUsuario: async (idUsuario: number) => {
     await api.put(`/administration/users/${idUsuario}/inativar`);
+  },
+
+  ativarUsuario: async (idUsuario: number) => {
+    await api.put(`/administration/users/${idUsuario}/ativar`);
+  },
+
+  atualizarIdiomaPadraoUsuario: async (idUsuario: number, idiomaPadrao: 'pt-BR' | 'en-US' | 'es-ES') => {
+    const response = await api.put<AdminUser>(`/administration/users/${idUsuario}/idioma-padrao`, {
+      idiomaPadrao,
+    });
+    return response.data;
   },
 
   listarRoles: async () => {
@@ -105,8 +124,10 @@ export const adminService = {
     await api.delete(`/administration/system-configs/${idConfig}`);
   },
 
-  listarListasAcesso: async () => {
-    const response = await api.get<AdminAccessList[]>('/administration/access-lists');
+  listarListasAcesso: async (params?: { tipoLista?: string; ativo?: boolean }) => {
+    const response = await api.get<AdminAccessList[]>('/administration/access-lists', {
+      params,
+    });
     return response.data;
   },
 
@@ -123,6 +144,18 @@ export const adminService = {
     const response = await api.get<AdminAccessLog[]>('/administration/access-logs', {
       params: { limite },
     });
+    return response.data;
+  },
+
+  obterSerieAcessos: async (periodo: 'week' | 'month' | 'year') => {
+    const response = await api.get<AdminAccessSeriesResponse>('/administration/access-logs/series', {
+      params: { periodo },
+    });
+    return response.data;
+  },
+
+  obterResumoDashboard: async () => {
+    const response = await api.get<AdminDashboardSummary>('/administration/dashboard/summary');
     return response.data;
   },
 

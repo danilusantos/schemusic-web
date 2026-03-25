@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import type { FormEvent } from 'react';
+import type * as React from 'react';
 import { Navigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAdminAuth } from '../../context/AdminAuthContext';
+import { useLabels } from '../../context/LabelsContext';
 
 export const LoginPage = () => {
   const { login, isAuthenticated } = useAdminAuth();
+  const { t, tf } = useLabels();
   const [email, setEmail] = useState('admin@schemusic.com');
   const [senha, setSenha] = useState('admin123');
   const [loading, setLoading] = useState(false);
@@ -15,7 +17,7 @@ export const LoginPage = () => {
     return <Navigate to="/admin" replace />;
   }
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
     setErro('');
     setLoading(true);
@@ -28,16 +30,16 @@ export const LoginPage = () => {
         const apiErro = (error.response?.data as { erro?: string } | undefined)?.erro;
 
         if (!error.response) {
-          setErro('Falha de conexao com a API. Se estiver local, verifique CORS/proxy e backend ativo.');
+          setErro(t('login.error_no_connection'));
         } else if (status === 401) {
-          setErro(apiErro ?? 'Credenciais invalidas para o administrador.');
+          setErro(apiErro ?? t('login.error_invalid_credentials'));
         } else {
-          setErro(apiErro ?? `Erro ao autenticar (HTTP ${status}).`);
+          setErro(apiErro ?? tf('login.error_auth_failed', { status: status ?? 'Unknown' }));
         }
       } else if (error instanceof Error) {
         setErro(error.message);
       } else {
-        setErro('Nao foi possivel autenticar. Verifique credenciais e API.');
+        setErro(t('login.error_generic'));
       }
     } finally {
       setLoading(false);
@@ -48,12 +50,12 @@ export const LoginPage = () => {
     <div className="min-h-screen bg-gradient-to-b from-warm-50 to-warm-100 p-6 grid place-items-center">
       <form className="ds-card w-full max-w-md space-y-4" onSubmit={handleSubmit}>
         <div>
-          <h1 className="ds-page-title text-2xl">SCHEMUSIC ADMIN</h1>
-          <p className="ds-page-subtitle mt-1">Acesso administrativo para operacao do sistema.</p>
+          <h1 className="ds-page-title text-2xl">{t('login.title')}</h1>
+          <p className="ds-page-subtitle mt-1">{t('login.subtitle')}</p>
         </div>
 
         <div>
-          <label htmlFor="email" className="ds-label">Email</label>
+          <label htmlFor="email" className="ds-label">{t('login.email_label')}</label>
           <input
             id="email"
             type="email"
@@ -65,7 +67,7 @@ export const LoginPage = () => {
         </div>
 
         <div>
-          <label htmlFor="senha" className="ds-label">Senha</label>
+          <label htmlFor="senha" className="ds-label">{t('login.senha_label')}</label>
           <input
             id="senha"
             type="password"
@@ -79,7 +81,7 @@ export const LoginPage = () => {
         {erro && <div className="ds-alert-error">{erro}</div>}
 
         <button type="submit" className="ds-btn-primary w-full" disabled={loading}>
-          {loading ? 'Entrando...' : 'Entrar no painel'}
+          {loading ? t('login.submit_loading') : t('login.submit_button')}
         </button>
       </form>
     </div>

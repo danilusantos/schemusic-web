@@ -3,12 +3,14 @@ export interface AdminAuthResponse {
   nome: string;
   perfil: string;
   token: string;
+  idiomaPadrao: 'pt-BR' | 'en-US' | 'es-ES';
 }
 
 export interface AdminUser {
   idUsuario: number;
   nome: string;
   email: string;
+  idiomaPadrao: 'pt-BR' | 'en-US' | 'es-ES';
   ativo: boolean;
   dataCadastro?: string;
   roles: string[];
@@ -46,4 +48,24 @@ export interface AdminAccessLog {
   userId: string;
   statusHttp: number;
   dataAcesso: string;
+}
+
+export interface AdminDashboardSummary {
+  totalUsuarios: number;
+  totalRoles: number;
+  totalListasAcesso: number;
+  totalLogs: number;
+  totalLogsUltimas24h: number;
+  totalConfigs: number;
+}
+
+export interface AdminAccessSeriesPoint {
+  referencia: string;
+  label: string;
+  total: number;
+}
+
+export interface AdminAccessSeriesResponse {
+  periodo: 'week' | 'month' | 'year';
+  pontos: AdminAccessSeriesPoint[];
 }
