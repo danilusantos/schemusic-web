@@ -3,9 +3,8 @@ import type * as React from 'react';
 import { useLabels } from '../../context/LabelsContext';
 import { adminService } from '../../services/adminService';
 import type { AdminSystemConfig } from '../../types/admin';
-import { ListIcon, PlusIcon, TrashIcon } from '../../icons';
+import { PlusIcon, TrashIcon } from '../../icons';
 import { AdminModal } from '../../components/admin/AdminModal';
-import { AdminCardContextMenu } from '../../components/admin/AdminCardContextMenu';
 
 export const SystemConfigsPage = () => {
   const { t, tf } = useLabels();
@@ -86,91 +85,63 @@ export const SystemConfigsPage = () => {
     });
   }, [configs, search, statusFilter]);
 
-  let configsContent;
-  if (filteredConfigs.length === 0) {
-    configsContent = (
-      <div className="py-xl text-center"><p className="text-warm-700">{t('configs.no_configs')}</p></div>
-    );
-  } else {
-    configsContent = (
-      <div className="ds-table-wrap">
-        <table className="ds-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>{t('configs.chave_label')}</th>
-              <th>{t('configs.valor_label')}</th>
-              <th>{t('configs.descricao_label')}</th>
-              <th className="text-center">{t('common.actions_label')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredConfigs.map((config) => (
-              <tr key={config.idConfig}>
-                <td className="font-mono text-xs">{config.idConfig}</td>
-                <td className="font-semibold text-warm-900">{config.chave}</td>
-                <td className="max-w-xs truncate font-mono text-xs text-warm-700">{config.valor}</td>
-                <td className="text-xs text-warm-700">{config.descricao || '-'}</td>
-                <td className="text-center">
-                  <button
-                    type="button"
-                    onClick={() => excluirConfig(config.idConfig)}
-                    className="inline-flex items-center gap-1 rounded-md bg-burnt px-md py-xs text-xs font-semibold text-white transition-colors hover:bg-burnt-dark"
-                  >
-                    <TrashIcon className="h-4 w-4" />
-                    {t('configs.button_delete')}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
-  }
-
   return (
-    <section className="ds-page">
+    <section className="space-y-8">
       {error && (
-        <div className="ds-alert-error mb-md">
-          <p className="text-sm">{error}</p>
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 mb-6">
+          <p className="text-sm text-red-800">{error}</p>
         </div>
       )}
 
-      <div className="ds-card bg-gradient-to-r from-white to-warm-50/80">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-burnt">{t('configs.page_title')}</p>
-        <h2 className="ds-page-title mt-2 text-2xl">{t('configs.page_title')}</h2>
-        <p className="ds-page-subtitle mt-2 max-w-3xl">{t('configs.page_subtitle')}</p>
+      {/* Header */}
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">{t('configs.page_title')}</h1>
+        <p className="mt-2 text-gray-600">{t('configs.page_subtitle')}</p>
       </div>
 
-      <div className="ds-card space-y-lg">
-        <div className="flex items-start justify-between gap-md">
-          <div className="flex items-center gap-2">
-            <ListIcon className="h-5 w-5 text-burnt" />
+      {/* Configs Table Card */}
+      <div className="rounded-xl border border-gray-200 bg-white p-6">
+        {/* Header with filters and actions */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="ds-card-title">{t('configs.list_title')}</h2>
-              <p className="text-sm text-warm-600">{t('configs.page_subtitle')}</p>
+              <h2 className="text-lg font-semibold text-gray-900">{t('configs.list_title')}</h2>
+              <p className="mt-1 text-sm text-gray-600">{tf('configs.total_configs', { count: filteredConfigs.length })}</p>
             </div>
+
+            <button
+              type="button"
+              onClick={() => setIsCreateModalOpen(true)}
+              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
+            >
+              <PlusIcon className="h-4 w-4" />
+              {t('configs.create_form_title')}
+            </button>
           </div>
 
-          <AdminCardContextMenu
-            items={[
-              {
-                label: t('configs.create_form_title'),
-                icon: <PlusIcon className="h-4 w-4 text-burnt" />,
-                onClick: () => setIsCreateModalOpen(true),
-              },
-            ]}
-          />
-        </div>
+          {/* Filters */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <label htmlFor="configs-search-filter" className="block text-sm font-medium text-gray-700 mb-2">
+                {t('configs.search_filter_label')}
+              </label>
+              <input
+                id="configs-search-filter"
+                type="text"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder={t('configs.search_filter_placeholder')}
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+              />
+            </div>
 
-        <div className="flex flex-wrap items-end justify-between gap-md">
-          <div className="grid w-full gap-md sm:w-auto sm:grid-cols-2">
-            <div>
-              <label htmlFor="configs-status-filter" className="ds-label">{t('configs.status_filter_label')}</label>
+            <div className="flex-1">
+              <label htmlFor="configs-status-filter" className="block text-sm font-medium text-gray-700 mb-2">
+                {t('configs.status_filter_label')}
+              </label>
               <select
                 id="configs-status-filter"
-                className="ds-select min-w-[180px]"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={statusFilter}
                 onChange={(event) => setStatusFilter(event.target.value as 'TODAS' | 'ATIVAS' | 'INATIVAS')}
               >
@@ -179,22 +150,49 @@ export const SystemConfigsPage = () => {
                 <option value="INATIVAS">{t('configs.status_inativas')}</option>
               </select>
             </div>
-            <div>
-              <label htmlFor="configs-search-filter" className="ds-label">{t('configs.search_filter_label')}</label>
-              <input
-                id="configs-search-filter"
-                type="text"
-                className="ds-input min-w-[220px]"
-                placeholder={t('configs.search_filter_placeholder')}
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-              />
-            </div>
           </div>
-          <p className="w-full text-sm text-warm-600 sm:w-auto">{tf('configs.total_configs', { count: filteredConfigs.length })}</p>
         </div>
 
-        {configsContent}
+        {/* Table */}
+        {filteredConfigs.length === 0 ? (
+          <div className="py-12 text-center">
+            <p className="text-gray-500">{t('configs.no_configs')}</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="border-b border-gray-200">
+                <tr>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700">ID</th>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700">{t('configs.chave_label')}</th>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700">{t('configs.valor_label')}</th>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700">{t('configs.descricao_label')}</th>
+                  <th className="px-4 py-3 text-center font-semibold text-gray-700">{t('common.actions_label')}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {filteredConfigs.map((config) => (
+                  <tr key={config.idConfig} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-4 py-3 font-mono text-xs text-gray-500">{config.idConfig}</td>
+                    <td className="px-4 py-3 font-semibold text-gray-900">{config.chave}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-gray-600 max-w-xs truncate" title={config.valor}>{config.valor}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">{config.descricao || '-'}</td>
+                    <td className="px-4 py-3 text-center">
+                      <button
+                        type="button"
+                        onClick={() => excluirConfig(config.idConfig)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 transition-colors"
+                      >
+                        <TrashIcon className="h-3 w-3" />
+                        {t('configs.button_delete')}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       <AdminModal

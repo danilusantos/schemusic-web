@@ -164,136 +164,132 @@ export const UsersPage = () => {
     }
   };
 
-  let usersContent;
-  if (users.length === 0) {
-    usersContent = (
-      <div className="py-xl text-center">
-        <p className="text-warm-700">{t('users.no_users')}</p>
-      </div>
-    );
-  } else {
-    usersContent = (
-      <div className="ds-table-wrap">
-        <table className="ds-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>{t('users.nome_label')}</th>
-              <th>{t('users.email_label')}</th>
-              <th>{t('users.column_language')}</th>
-              <th>{t('users.roles_label')}</th>
-              <th>{t('users.status_filter_label')}</th>
-              <th className="text-center">{t('common.actions_label')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user.idUsuario}>
-                <td className="font-mono text-xs">{user.idUsuario}</td>
-                <td className="font-semibold text-warm-900">{user.nome}</td>
-                <td className="font-mono text-xs text-warm-700">{user.email}</td>
-                <td>
-                  <span className="inline-flex items-center gap-2 rounded-full bg-warm-100 px-3 py-1 text-xs font-semibold text-warm-800">
-                    <span className="text-sm leading-none">{getLanguageFlag(user.idiomaPadrao)}</span>
-                    {getLanguageLabel(user.idiomaPadrao)}
-                  </span>
-                </td>
-                <td>
-                  {user.roles.length > 0 ? (
-                    <div className="flex flex-wrap gap-xs">
-                      {user.roles.map((role) => (
-                        <span
-                          key={role}
-                          className="inline-block rounded-full bg-teal-light/20 px-xs py-xs text-xs font-semibold text-teal-dark"
-                        >
-                          {role}
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    <span className="text-warm-500">-</span>
-                  )}
-                </td>
-                <td>
-                  <span className={[
-                    'inline-block rounded-full px-md py-xs text-xs font-semibold',
-                    user.ativo ? 'bg-burnt/15 text-burnt-dark' : 'bg-warm-100 text-warm-700',
-                  ].join(' ')}>
-                    {user.ativo ? t('users.status_ativos') : t('users.status_inativos')}
-                  </span>
-                </td>
-                <td className="text-center">
-                  {user.ativo ? (
-                    <button
-                      type="button"
-                      onClick={() => inativarUsuario(user.idUsuario)}
-                      className="inline-flex items-center gap-1 rounded-md bg-burnt px-md py-xs text-xs font-semibold text-white transition-colors hover:bg-burnt-dark"
-                    >
-                      <CloseLineIcon className="h-4 w-4" />
-                      {t('users.button_inativar')}
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => ativarUsuario(user.idUsuario)}
-                      className="inline-flex items-center gap-1 rounded-md bg-warm-800 px-md py-xs text-xs font-semibold text-white transition-colors hover:bg-warm-900"
-                    >
-                      <CheckLineIcon className="h-4 w-4" />
-                      {t('users.button_ativar')}
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
-  }
-
   return (
-    <section className="ds-page space-y-lg">
+    <section className="space-y-8">
       {error && (
-        <div className="ds-alert-error">
-          <p className="text-sm">{error}</p>
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+          <p className="text-sm text-red-800">{error}</p>
         </div>
       )}
 
-      <div className="ds-card bg-gradient-to-r from-white to-warm-50/80">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-burnt">{t('users.list_title')}</p>
-        <h2 className="ds-page-title mt-2 text-2xl">{t('users.page_title')}</h2>
-        <p className="ds-page-subtitle mt-2 max-w-3xl">{t('users.page_subtitle')}</p>
+      {/* Header */}
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">{t('users.page_title')}</h1>
+        <p className="mt-2 text-gray-600">{t('users.page_subtitle')}</p>
       </div>
 
-      <div className="ds-card space-y-lg">
-        <div className="flex items-start justify-between gap-md">
-          <div className="flex items-center gap-2">
-            <ListIcon className="h-5 w-5 text-burnt" />
-            <div>
-              <h2 className="ds-card-title">{t('users.list_title')}</h2>
-              <p className="text-sm text-warm-600">{t('users.list_subtitle')}</p>
-            </div>
+      {/* Users Table Card */}
+      <div className="rounded-xl border border-gray-200 bg-white p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">{t('users.list_title')}</h2>
+            <p className="mt-1 text-sm text-gray-600">{tf('users.total_users', { count: users.length })}</p>
           </div>
 
-          <AdminCardContextMenu
-            items={[
-              {
-                label: t('users.create_form_title'),
-                icon: <PlusIcon className="h-4 w-4 text-burnt" />,
-                onClick: openCreateModal,
-              },
-              {
-                label: t('users.assign_form_title'),
-                icon: <UserCircleIcon className="h-4 w-4 text-burnt" />,
-                onClick: openRolesModal,
-              },
-            ]}
-          />
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={openCreateModal}
+              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
+            >
+              <PlusIcon className="h-4 w-4" />
+              {t('users.create_form_title')}
+            </button>
+
+            <button
+              type="button"
+              onClick={openRolesModal}
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <UserCircleIcon className="h-4 w-4" />
+              {t('users.assign_form_title')}
+            </button>
+          </div>
         </div>
 
-        <p className="text-sm text-warm-600">{tf('users.total_users', { count: users.length })}</p>
-
-        {usersContent}
+        {users.length === 0 ? (
+          <div className="py-12 text-center">
+            <p className="text-gray-500">{t('users.no_users')}</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="border-b border-gray-200">
+                <tr>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700">ID</th>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700">{t('users.nome_label')}</th>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700">{t('users.email_label')}</th>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700">{t('users.column_language')}</th>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700">{t('users.roles_label')}</th>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700">{t('users.status_filter_label')}</th>
+                  <th className="px-4 py-3 text-center font-semibold text-gray-700">{t('common.actions_label')}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {users.map((user) => (
+                  <tr key={user.idUsuario} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-4 py-3 font-mono text-xs text-gray-500">{user.idUsuario}</td>
+                    <td className="px-4 py-3 font-semibold text-gray-900">{user.nome}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-gray-600">{user.email}</td>
+                    <td className="px-4 py-3">
+                      <span className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800">
+                        <span className="text-sm">{getLanguageFlag(user.idiomaPadrao)}</span>
+                        {getLanguageLabel(user.idiomaPadrao)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      {user.roles.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {user.roles.map((role) => (
+                            <span
+                              key={role}
+                              className="inline-block rounded-full bg-purple-100 px-2.5 py-1 text-xs font-semibold text-purple-800"
+                            >
+                              {role}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={[
+                        'inline-block rounded-full px-3 py-1 text-xs font-semibold',
+                        user.ativo
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800',
+                      ].join(' ')}>
+                        {user.ativo ? t('users.status_ativos') : t('users.status_inativos')}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {user.ativo ? (
+                        <button
+                          type="button"
+                          onClick={() => inativarUsuario(user.idUsuario)}
+                          className="inline-flex items-center gap-1.5 rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 transition-colors"
+                        >
+                          <CloseLineIcon className="h-3 w-3" />
+                          {t('users.button_inativar')}
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => ativarUsuario(user.idUsuario)}
+                          className="inline-flex items-center gap-1.5 rounded-md bg-green-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-700 transition-colors"
+                        >
+                          <CheckLineIcon className="h-3 w-3" />
+                          {t('users.button_ativar')}
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       <AdminModal

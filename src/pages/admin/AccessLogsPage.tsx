@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react';
 import { useLabels } from '../../context/LabelsContext';
 import { adminService } from '../../services/adminService';
 import type { AdminAccessLog } from '../../types/admin';
-import { ListIcon, ArrowUpIcon } from '../../icons';
-import { AdminCardContextMenu } from '../../components/admin/AdminCardContextMenu';
 
 const formatDate = (value: string) => {
   if (!value) {
@@ -39,63 +37,65 @@ export const AccessLogsPage = () => {
   }, []);
 
   const getStatusColor = (status: number) => {
-    if (status >= 200 && status < 300) return 'bg-burnt/15 text-burnt-dark';
-    if (status >= 300 && status < 400) return 'bg-warm-100 text-warm-800';
-    if (status >= 400 && status < 500) return 'bg-warm-200 text-warm-900';
-    return 'bg-warm-300 text-warm-900';
+    if (status >= 200 && status < 300) return 'bg-green-100 text-green-800';
+    if (status >= 300 && status < 400) return 'bg-blue-100 text-blue-800';
+    if (status >= 400 && status < 500) return 'bg-orange-100 text-orange-800';
+    return 'bg-red-100 text-red-800';
   };
 
   const getMethodColor = (method: string) => {
     const colors: Record<string, string> = {
-      GET: 'bg-warm-100 text-warm-900',
-      POST: 'bg-burnt/15 text-burnt-dark',
-      PUT: 'bg-warm-200 text-warm-900',
-      DELETE: 'bg-warm-300 text-warm-900',
-      NAVIGATE: 'bg-burnt/20 text-burnt-dark',
+      GET: 'bg-blue-100 text-blue-800',
+      POST: 'bg-green-100 text-green-800',
+      PUT: 'bg-orange-100 text-orange-800',
+      DELETE: 'bg-red-100 text-red-800',
+      NAVIGATE: 'bg-purple-100 text-purple-800',
     };
-    return colors[method] || 'bg-warm-100 text-warm-700';
+    return colors[method] || 'bg-gray-100 text-gray-700';
   };
 
   let logsContent;
   if (logs.length === 0) {
     logsContent = (
-      <div className="py-xl text-center"><p className="text-warm-700">{t('access_logs.no_logs')}</p></div>
+      <div className="py-12 text-center">
+        <p className="text-gray-500">{t('access_logs.no_logs')}</p>
+      </div>
     );
   } else {
     logsContent = (
-      <div className="ds-table-wrap">
-        <table className="ds-table">
-          <thead>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="border-b border-gray-200">
             <tr>
-              <th>ID</th>
-              <th>{t('access_logs.metodo_label')}</th>
-              <th>{t('dashboard.table_path')}</th>
-              <th>IP</th>
-              <th>User ID</th>
-              <th>{t('access_logs.status_label')}</th>
-              <th>Data/Hora</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-700">ID</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-700">{t('access_logs.metodo_label')}</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-700">{t('dashboard.table_path')}</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-700">IP</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-700">User ID</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-700">{t('access_logs.status_label')}</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-700">Data/Hora</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-gray-100">
             {logs.map((log) => (
-              <tr key={log.idAcesso}>
-                <td className="font-mono text-xs">{log.idAcesso}</td>
-                <td>
-                  <span className={`inline-block px-md py-xs rounded-full text-xs font-semibold ${getMethodColor(log.metodo)}`}>
+              <tr key={log.idAcesso} className="hover:bg-gray-50 transition-colors">
+                <td className="px-4 py-3 font-mono text-xs text-gray-500">{log.idAcesso}</td>
+                <td className="px-4 py-3">
+                  <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${getMethodColor(log.metodo)}`}>
                     {log.metodo}
                   </span>
                 </td>
-                <td className="max-w-xs truncate font-mono text-xs text-warm-700" title={log.caminho}>
+                <td className="px-4 py-3 font-mono text-xs text-gray-600 max-w-xs truncate" title={log.caminho}>
                   {log.caminho}
                 </td>
-                <td className="font-mono text-xs text-warm-900">{log.ip}</td>
-                <td className="font-mono text-xs text-warm-700">{log.userId || '-'}</td>
-                <td>
-                  <span className={`inline-block px-md py-xs rounded-full text-xs font-semibold ${getStatusColor(log.statusHttp)}`}>
+                <td className="px-4 py-3 font-mono text-xs text-gray-900">{log.ip}</td>
+                <td className="px-4 py-3 font-mono text-xs text-gray-600">{log.userId || '-'}</td>
+                <td className="px-4 py-3">
+                  <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${getStatusColor(log.statusHttp)}`}>
                     {log.statusHttp}
                   </span>
                 </td>
-                <td className="whitespace-nowrap text-xs text-warm-700">
+                <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-600">
                   {formatDate(log.dataAcesso)}
                 </td>
               </tr>
@@ -107,67 +107,59 @@ export const AccessLogsPage = () => {
   }
 
   return (
-    <section className="ds-page">
+    <section className="space-y-8">
       {error && (
-        <div className="ds-alert-error mb-md">
-          <p className="text-sm">{error}</p>
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 mb-6">
+          <p className="text-sm text-red-800">{error}</p>
         </div>
       )}
 
-      <div className="ds-card bg-gradient-to-r from-white to-warm-50/80">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-burnt">{t('access_logs.page_title')}</p>
-        <h2 className="ds-page-title mt-2 text-2xl">{t('access_logs.page_title')}</h2>
-        <p className="ds-page-subtitle mt-2 max-w-3xl">{t('access_logs.page_subtitle')}</p>
+      {/* Header */}
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">{t('access_logs.page_title')}</h1>
+        <p className="mt-2 text-gray-600">{t('access_logs.page_subtitle')}</p>
       </div>
 
-      <div className="ds-card space-y-lg">
-        <div className="flex items-start justify-between gap-md">
-          <div className="flex items-center gap-2">
-            <ListIcon className="h-5 w-5 text-burnt" />
+      {/* Logs Card */}
+      <div className="rounded-xl border border-gray-200 bg-white p-6">
+        {/* Header with limit control */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="ds-card-title">{t('access_logs.page_title')}</h2>
-              <p className="text-sm text-warm-600">{t('access_logs.page_subtitle')}</p>
+              <h2 className="text-lg font-semibold text-gray-900">{t('access_logs.page_title')}</h2>
+              <p className="mt-1 text-sm text-gray-600">{tf('access_logs.total_logs', { count: logs.length })}</p>
             </div>
           </div>
 
-          <AdminCardContextMenu
-            items={[
-              {
-                label: t('access_logs.limit_button'),
-                icon: <ArrowUpIcon className="h-4 w-4 text-burnt" />,
-                onClick: () => {
-                  void carregar();
-                },
-              },
-            ]}
-          />
-        </div>
-
-        <div className="flex flex-wrap items-end justify-between gap-md">
-          <div className="w-full max-w-xs">
-            <label htmlFor="limite" className="ds-label">{t('access_logs.limit_label')}</label>
-            <div className="flex gap-md">
-              <input
-                id="limite"
-                type="number"
-                min={1}
-                max={500}
-                value={limite}
-                onChange={(e) => setLimite(Number(e.target.value))}
-                className="ds-input flex-1"
-              />
-              <button
-                type="button"
-                onClick={() => void carregar()}
-                className="ds-btn-primary"
-              >
-                {t('access_logs.limit_button')}
-              </button>
+          {/* Limit control */}
+          <div className="flex flex-col sm:flex-row gap-4 items-end">
+            <div className="flex-1 max-w-xs">
+              <label htmlFor="limite" className="block text-sm font-medium text-gray-700 mb-2">
+                {t('access_logs.limit_label')}
+              </label>
+              <div className="flex gap-2">
+                <input
+                  id="limite"
+                  type="number"
+                  min={1}
+                  max={500}
+                  value={limite}
+                  onChange={(e) => setLimite(Number(e.target.value))}
+                  className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => void carregar()}
+                  className="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white hover:bg-purple-700 transition-colors"
+                >
+                  {t('access_logs.limit_button')}
+                </button>
+              </div>
             </div>
           </div>
-          <p className="w-full text-sm text-warm-600 sm:w-auto">{tf('access_logs.total_logs', { count: logs.length })}</p>
         </div>
 
+        {/* Table */}
         {logsContent}
       </div>
     </section>

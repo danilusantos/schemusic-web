@@ -347,7 +347,7 @@ const AdminSidebar = ({
       </div>
 
       {(isExpanded || isHovered || isMobileOpen) && (
-        <div className="mt-5">
+        <div className="mt-4">
           <div className="relative">
             <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-400">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -360,57 +360,57 @@ const AdminSidebar = ({
               value={search}
               onChange={(event) => onSearchChange(event.target.value)}
               placeholder={t('common.search')}
-              className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2.5 pl-10 text-sm text-gray-700 outline-none transition focus:border-burnt focus:bg-white focus:ring-2 focus:ring-burnt/15"
+              className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 pl-10 text-sm text-gray-700 outline-none transition focus:border-gray-300 focus:bg-white focus:ring-2 focus:ring-blue-500/10"
             />
           </div>
         </div>
       )}
 
       <nav className="mt-6 flex-1 overflow-y-auto pr-1">
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-6">
+          {/* Geral Section */}
           <div>
             {(isExpanded || isHovered || isMobileOpen) && (
-              <h2 className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">
+              <h2 className="mb-2 px-1 text-xs font-semibold uppercase tracking-widest text-gray-400">
                 {t('layout.overview_title')}
               </h2>
             )}
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1">
               {mainItems.map((item) => renderNavItem(item))}
             </div>
           </div>
 
-          <div>
-            {(isExpanded || isHovered || isMobileOpen) && (
-              <h2 className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">
-                {t('layout.administration_title')}
-              </h2>
-            )}
+          {/* Administração Section */}
+          {adminItems.length > 0 && (
+            <div>
+              <button
+                type="button"
+                onClick={onToggleAdminCollapsed}
+                className={[
+                  'mb-2 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 transition hover:text-gray-900',
+                  !isExpanded && !isHovered && !isMobileOpen ? 'justify-center px-2' : 'justify-between',
+                ].join(' ')}
+              >
+                <span className="inline-flex h-5 w-5 items-center justify-center transition">
+                  {!isExpanded && !isHovered && !isMobileOpen ? <MoreDotIcon className="h-4 w-4" /> : <ListIcon className="h-4 w-4" />}
+                </span>
+                {(isExpanded || isHovered || isMobileOpen) && (
+                  <>
+                    <span className="flex-1 text-left text-xs font-semibold uppercase tracking-widest text-gray-400">
+                      {t('layout.administration_title')}
+                    </span>
+                    <ChevronDownIcon className={['h-4 w-4 transition-transform text-gray-400', adminCollapsed ? '' : 'rotate-180'].join(' ')} />
+                  </>
+                )}
+              </button>
 
-            <button
-              type="button"
-              onClick={onToggleAdminCollapsed}
-              className={[
-                'mb-2 flex w-full items-center gap-3 rounded-2xl border border-gray-200 bg-white px-3 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-warm-50 hover:text-gray-900',
-                !isExpanded && !isHovered && !isMobileOpen ? 'justify-center px-2.5' : 'justify-between',
-              ].join(' ')}
-            >
-              <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-burnt/10 text-burnt-dark">
-                {!isExpanded && !isHovered && !isMobileOpen ? <MoreDotIcon className="h-4 w-4" /> : <ListIcon className="h-4 w-4" />}
-              </span>
-              {(isExpanded || isHovered || isMobileOpen) && (
-                <>
-                  <span className="flex-1 text-left">{t('layout.admin_menu_button')}</span>
-                  <ChevronDownIcon className={['h-4 w-4 transition-transform', adminCollapsed ? '' : 'rotate-180'].join(' ')} />
-                </>
+              {!adminCollapsed && (
+                <div className="mt-2 flex flex-col gap-1">
+                  {adminItems.map((item) => renderNavItem(item))}
+                </div>
               )}
-            </button>
-
-            {!adminCollapsed && (
-              <div className="flex flex-col gap-2">
-                {adminItems.map((item) => renderNavItem(item))}
-              </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </nav>
     </div>
@@ -490,21 +490,21 @@ const LayoutContent = () => {
       to={item.to}
       end={item.to === '/admin'}
       className={({ isActive }) => [
-        'group flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition',
+        'group flex min-h-10 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition',
         isActive
-          ? 'bg-burnt/10 text-burnt-dark'
-          : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900',
-        !isExpanded && !isHovered && !isMobileOpen ? 'justify-center px-2.5' : '',
+          ? 'text-gray-900 font-semibold'
+          : 'text-gray-600 hover:text-gray-900',
+        !isExpanded && !isHovered && !isMobileOpen ? 'justify-center px-2' : '',
       ].join(' ')}
     >
       {({ isActive }) => (
         <>
           <span
             className={[
-              'inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition',
+              'inline-flex h-5 w-5 shrink-0 items-center justify-center transition',
               isActive
-                ? 'bg-burnt/15 text-burnt-dark'
-                : 'bg-gray-50 text-gray-600 group-hover:bg-burnt/10 group-hover:text-burnt-dark',
+                ? 'text-gray-900'
+                : 'text-gray-500 group-hover:text-gray-700',
             ].join(' ')}
           >
             {item.icon}

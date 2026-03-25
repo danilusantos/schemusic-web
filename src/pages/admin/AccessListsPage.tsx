@@ -3,9 +3,8 @@ import type * as React from 'react';
 import { useLabels } from '../../context/LabelsContext';
 import { adminService } from '../../services/adminService';
 import type { AdminAccessList } from '../../types/admin';
-import { ListIcon, PlusIcon, TrashIcon } from '../../icons';
+import { PlusIcon, TrashIcon } from '../../icons';
 import { AdminModal } from '../../components/admin/AdminModal';
-import { AdminCardContextMenu } from '../../components/admin/AdminCardContextMenu';
 
 export const AccessListsPage = () => {
   const { t, tf } = useLabels();
@@ -97,110 +96,49 @@ export const AccessListsPage = () => {
     );
   }, [listas, search]);
 
-  let listasContent;
-  if (filteredListas.length === 0) {
-    listasContent = (
-      <div className="py-xl text-center"><p className="text-warm-700">{t('access_lists.no_items')}</p></div>
-    );
-  } else {
-    listasContent = (
-      <div className="ds-table-wrap">
-        <table className="ds-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>{t('access_lists.lista_filter_label')}</th>
-              <th>{t('access_lists.tipo_alvo_label')}</th>
-              <th>{t('access_lists.valor_alvo_label')}</th>
-              <th>{t('access_lists.observacao_label')}</th>
-              <th>{t('users.status_filter_label')}</th>
-              <th className="text-center">{t('common.actions_label')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredListas.map((item) => (
-              <tr key={item.idListaAcesso}>
-                <td className="font-mono text-xs">{item.idListaAcesso}</td>
-                <td>
-                  <span className={[
-                    'inline-block rounded-full px-md py-xs text-xs font-semibold',
-                    item.tipoLista === 'WHITELIST' ? 'bg-burnt/15 text-burnt-dark' : 'bg-warm-100 text-warm-800',
-                  ].join(' ')}>
-                    {item.tipoLista}
-                  </span>
-                </td>
-                <td className="font-semibold text-warm-900">{item.tipoAlvo}</td>
-                <td className="max-w-xs truncate font-mono text-xs text-warm-700">{item.valorAlvo}</td>
-                <td className="text-xs text-warm-700">{item.observacao || '-'}</td>
-                <td>
-                  <span className={[
-                    'inline-block rounded-full px-md py-xs text-xs font-semibold',
-                    item.ativo ? 'bg-burnt/15 text-burnt-dark' : 'bg-warm-100 text-warm-700',
-                  ].join(' ')}>
-                    {item.ativo ? t('access_lists.status_ativos') : t('access_lists.status_inativos')}
-                  </span>
-                </td>
-                <td className="text-center">
-                  <button
-                    type="button"
-                    onClick={() => inativarItem(item.idListaAcesso)}
-                    disabled={!item.ativo}
-                    className="inline-flex items-center gap-1 rounded-md bg-burnt px-md py-xs text-xs font-semibold text-white transition-colors hover:bg-burnt-dark disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <TrashIcon className="h-4 w-4" />
-                    {t('access_lists.button_inativar')}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
-  }
-
   return (
-    <section className="ds-page">
+    <section className="space-y-8">
       {error && (
-        <div className="ds-alert-error mb-md">
-          <p className="text-sm">{error}</p>
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 mb-6">
+          <p className="text-sm text-red-800">{error}</p>
         </div>
       )}
 
-      <div className="ds-card bg-gradient-to-r from-white to-warm-50/80">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-burnt">{t('access_lists.page_title')}</p>
-        <h2 className="ds-page-title mt-2 text-2xl">{t('access_lists.page_title')}</h2>
-        <p className="ds-page-subtitle mt-2 max-w-3xl">{t('access_lists.page_subtitle')}</p>
+      {/* Header */}
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">{t('access_lists.page_title')}</h1>
+        <p className="mt-2 text-gray-600">{t('access_lists.page_subtitle')}</p>
       </div>
 
-      <div className="ds-card space-y-lg">
-        <div className="flex items-start justify-between gap-md">
-          <div className="flex items-center gap-2">
-            <ListIcon className="h-5 w-5 text-burnt" />
+      {/* Lists Table Card */}
+      <div className="rounded-xl border border-gray-200 bg-white p-6">
+        {/* Header with filters and actions */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="ds-card-title">{t('access_lists.list_title')}</h2>
-              <p className="text-sm text-warm-600">{t('access_lists.page_subtitle')}</p>
+              <h2 className="text-lg font-semibold text-gray-900">{t('access_lists.list_title')}</h2>
+              <p className="mt-1 text-sm text-gray-600">{tf('access_lists.total_items', { count: filteredListas.length })}</p>
             </div>
+
+            <button
+              type="button"
+              onClick={() => setIsCreateModalOpen(true)}
+              className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 transition-colors"
+            >
+              <PlusIcon className="h-4 w-4" />
+              {t('access_lists.create_form_title')}
+            </button>
           </div>
 
-          <AdminCardContextMenu
-            items={[
-              {
-                label: t('access_lists.create_form_title'),
-                icon: <PlusIcon className="h-4 w-4 text-burnt" />,
-                onClick: () => setIsCreateModalOpen(true),
-              },
-            ]}
-          />
-        </div>
-
-        <div className="flex flex-wrap items-end justify-between gap-md">
-          <div className="grid w-full gap-md sm:w-auto sm:grid-cols-3">
-            <div>
-              <label htmlFor="listas-lista-filter" className="ds-label">{t('access_lists.lista_filter_label')}</label>
+          {/* Filters */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <label htmlFor="listas-lista-filter" className="block text-sm font-medium text-gray-700 mb-2">
+                {t('access_lists.lista_filter_label')}
+              </label>
               <select
                 id="listas-lista-filter"
-                className="ds-select min-w-[160px]"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                 value={listaFilter}
                 onChange={(event) => setListaFilter(event.target.value as 'TODAS' | 'WHITELIST' | 'BLACKLIST')}
               >
@@ -209,11 +147,14 @@ export const AccessListsPage = () => {
                 <option value="BLACKLIST">{t('access_lists.lista_filter_blacklist')}</option>
               </select>
             </div>
-            <div>
-              <label htmlFor="listas-status-filter" className="ds-label">{t('access_lists.status_filter_label')}</label>
+
+            <div className="flex-1">
+              <label htmlFor="listas-status-filter" className="block text-sm font-medium text-gray-700 mb-2">
+                {t('access_lists.status_filter_label')}
+              </label>
               <select
                 id="listas-status-filter"
-                className="ds-select min-w-[160px]"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                 value={statusFilter}
                 onChange={(event) => setStatusFilter(event.target.value as 'TODOS' | 'ATIVOS' | 'INATIVOS')}
               >
@@ -222,22 +163,84 @@ export const AccessListsPage = () => {
                 <option value="INATIVOS">{t('access_lists.status_inativos')}</option>
               </select>
             </div>
-            <div>
-              <label htmlFor="listas-search-filter" className="ds-label">{t('access_lists.search_filter_label')}</label>
+
+            <div className="flex-1">
+              <label htmlFor="listas-search-filter" className="block text-sm font-medium text-gray-700 mb-2">
+                {t('access_lists.search_filter_label')}
+              </label>
               <input
                 id="listas-search-filter"
                 type="text"
-                className="ds-input min-w-[220px]"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                 placeholder={t('access_lists.search_placeholder')}
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
               />
             </div>
           </div>
-          <p className="w-full text-sm text-warm-600 sm:w-auto">{tf('access_lists.total_items', { count: filteredListas.length })}</p>
         </div>
 
-        {listasContent}
+        {/* Table */}
+        {filteredListas.length === 0 ? (
+          <div className="py-12 text-center">
+            <p className="text-gray-500">{t('access_lists.no_items')}</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="border-b border-gray-200">
+                <tr>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700">ID</th>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700">{t('access_lists.lista_filter_label')}</th>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700">{t('access_lists.tipo_alvo_label')}</th>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700">{t('access_lists.valor_alvo_label')}</th>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700">{t('access_lists.observacao_label')}</th>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700">{t('users.status_filter_label')}</th>
+                  <th className="px-4 py-3 text-center font-semibold text-gray-700">{t('common.actions_label')}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {filteredListas.map((item) => (
+                  <tr key={item.idListaAcesso} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-4 py-3 font-mono text-xs text-gray-500">{item.idListaAcesso}</td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
+                        item.tipoLista === 'WHITELIST'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-orange-100 text-orange-800'
+                      }`}>
+                        {item.tipoLista}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 font-semibold text-gray-900">{item.tipoAlvo}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-gray-600 max-w-xs truncate" title={item.valorAlvo}>{item.valorAlvo}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">{item.observacao || '-'}</td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
+                        item.ativo
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-600'
+                      }`}>
+                        {item.ativo ? t('access_lists.status_ativos') : t('access_lists.status_inativos')}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <button
+                        type="button"
+                        onClick={() => inativarItem(item.idListaAcesso)}
+                        disabled={!item.ativo}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <TrashIcon className="h-3 w-3" />
+                        {t('access_lists.button_inativar')}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       <AdminModal
