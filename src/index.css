@@ -10,7 +10,7 @@
   }
 
   .ds-topbar {
-    @apply sticky top-0 z-30 border-b border-warm-300 bg-white/95 backdrop-blur-md;
+    @apply sticky top-0 z-30 border-b border-warm-300 bg-white/90 backdrop-blur-xl;
   }
 
   .ds-topbar-inner {
@@ -34,7 +34,7 @@
   }
 
   .ds-card {
-    @apply rounded-xl border border-warm-300 bg-white p-6 shadow-sm;
+    @apply rounded-2xl border border-warm-200 bg-white p-6 shadow-sm;
   }
 
   .ds-card-title {
@@ -59,7 +59,7 @@
   }
 
   .ds-btn {
-    @apply inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-semibold transition;
+    @apply inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition;
   }
 
   .ds-btn-primary {
@@ -79,7 +79,7 @@
   }
 
   .ds-table-wrap {
-    @apply overflow-x-auto rounded-xl border border-warm-300 bg-white;
+    @apply overflow-x-auto rounded-2xl border border-warm-200 bg-white shadow-sm;
   }
 
   .ds-table {
@@ -103,7 +103,7 @@
   }
 
   .ds-kpi {
-    @apply rounded-xl border border-warm-300 bg-white p-4;
+    @apply rounded-2xl border border-warm-200 bg-white p-4 shadow-sm;
   }
 
   .ds-kpi-label {
@@ -202,7 +202,7 @@ p {
   width: min(460px, 100%);
   background: linear-gradient(165deg, var(--surface) 0%, var(--surface-2) 100%);
   border: 1px solid var(--stroke);
-  border-radius: 24px;
+  border-radius: 28px;
   padding: 28px;
   box-shadow: var(--shadow);
   display: grid;
@@ -284,8 +284,8 @@ select:focus {
   gap: 16px;
   padding: 16px 20px;
   border-bottom: 1px solid var(--stroke);
-  background: rgba(255, 253, 248, 0.95);
-  backdrop-filter: blur(7px);
+  background: rgba(255, 253, 248, 0.9);
+  backdrop-filter: blur(16px);
   position: sticky;
   top: 0;
   z-index: 20;
@@ -322,16 +322,16 @@ select:focus {
 .admin-sidebar {
   background: rgba(255, 253, 248, 0.92);
   border: 1px solid var(--stroke);
-  border-radius: var(--radius);
-  padding: 10px;
+  border-radius: 18px;
+  padding: 12px;
   display: grid;
   align-content: start;
   gap: 6px;
 }
 
 .sidebar-link {
-  padding: 10px;
-  border-radius: 10px;
+  padding: 12px;
+  border-radius: 14px;
   color: var(--ink-soft);
 }
 
@@ -344,8 +344,8 @@ select:focus {
 .admin-content {
   background: rgba(255, 253, 248, 0.92);
   border: 1px solid var(--stroke);
-  border-radius: var(--radius);
-  padding: 18px;
+  border-radius: 18px;
+  padding: 20px;
 }
 
 .page-title {
@@ -480,8 +480,8 @@ th {
   padding: 10px;
   border-radius: 10px;
   border: 1px solid rgba(142, 31, 31, 0.3);
-  background: rgba(142, 31, 31, 0.08);
-  color: #721515;
+  background: #fff1f1;
+  color: #7f1d1d;
   font-size: 14px;
 }
 
@@ -565,7 +565,6 @@ th {
   padding-left: 20px !important;
   font-size: 13px;
   border-left: 2px solid transparent;
-  padding-left: 10px;
 }
 
 .submenu-link.active {
@@ -636,6 +635,6 @@ th {
 
 [data-theme='dark'] .error-box {
   border-color: rgba(255, 107, 53, 0.3);
-  background: rgba(255, 107, 53, 0.08);
-  color: #ff9999;
+  background: #2a1111;
+  color: #fff5f5;
 }

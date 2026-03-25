@@ -126,6 +126,22 @@ type AdminHeaderBarProps = {
   t: (key: string) => string;
 };
 
+type AdminSidebarProps = {
+  sidebarWidthClass: string;
+  isExpanded: boolean;
+  isHovered: boolean;
+  isMobileOpen: boolean;
+  setIsHovered: (value: boolean) => void;
+  search: string;
+  onSearchChange: (value: string) => void;
+  mainItems: NavigationItem[];
+  adminItems: NavigationItem[];
+  adminCollapsed: boolean;
+  onToggleAdminCollapsed: () => void;
+  renderNavItem: (item: NavigationItem) => ReactElement;
+  t: (key: string) => string;
+};
+
 const AdminHeaderBar = ({
   pathname,
   sessionName,
@@ -159,14 +175,14 @@ const AdminHeaderBar = ({
   }, [setUserMenuOpen]);
 
   return (
-    <header className="sticky top-0 z-30 flex w-full border-b border-gray-200 bg-white/95 backdrop-blur-xl">
+    <header className="sticky top-0 z-[60] flex w-full border-b border-gray-200 bg-white/90 backdrop-blur-xl">
       <div className="flex w-full flex-col items-center justify-between lg:flex-row lg:px-6">
         <div className="flex w-full items-center justify-between gap-2 border-b border-gray-200 px-3 py-3 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4">
           <button
             type="button"
             onClick={onToggleSidebar}
             aria-label={isMobileOpen ? 'Fechar menu lateral' : 'Abrir menu lateral'}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:border-burnt/30 hover:bg-warm-50 hover:text-burnt-dark active:scale-95 lg:h-11 lg:w-11"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:border-burnt/30 hover:bg-warm-50 hover:text-burnt-dark active:scale-95 lg:h-11 lg:w-11"
           >
             {isMobileOpen ? (
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -180,13 +196,18 @@ const AdminHeaderBar = ({
           </button>
           <div className="hidden w-full max-w-md items-center md:flex">
             <div className="relative w-full">
+              <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-400">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7.33333 12.6667C10.2789 12.6667 12.6667 10.2789 12.6667 7.33333C12.6667 4.38781 10.2789 2 7.33333 2C4.38781 2 2 4.38781 2 7.33333C2 10.2789 4.38781 12.6667 7.33333 12.6667Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M14 14L11 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
               <input
                 type="text"
                 readOnly
                 value={pathname}
-                className="w-full rounded-lg border border-gray-200 bg-gray-50 py-2 pl-3 pr-10 text-sm text-gray-600"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-2.5 pl-10 pr-4 text-sm text-gray-600"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">⌘K</span>
             </div>
           </div>
         </div>
@@ -194,31 +215,35 @@ const AdminHeaderBar = ({
         <div className="flex w-full items-center justify-end gap-2 px-3 pb-3 md:gap-3 md:px-0 md:py-0">
           <div
             className={[
-              'rounded-full border px-2 py-1 text-[11px] font-semibold sm:hidden',
-              isSessionExpiringSoon ? 'border-amber-300 bg-amber-50 text-amber-700' : 'border-gray-200 bg-gray-50 text-gray-700',
+              'inline-flex items-center gap-2 rounded-2xl border px-3 py-2 text-[11px] font-semibold shadow-sm sm:hidden',
+              isSessionExpiringSoon
+                ? 'border-amber-300 bg-amber-50 text-amber-800'
+                : 'border-gray-200 bg-white text-gray-700',
               isSessionCritical ? 'animate-pulse' : '',
             ].join(' ')}
           >
+            <span className={['h-2 w-2 rounded-full', isSessionExpiringSoon ? 'bg-amber-500' : 'bg-emerald-500'].join(' ')} />
             {sessionCountdown}
           </div>
           <div
             className={[
-              'hidden rounded-full border px-3 py-1 text-xs font-semibold sm:block',
-              isSessionExpiringSoon ? 'border-amber-300 bg-amber-50 text-amber-700' : 'border-gray-200 bg-gray-50 text-gray-700',
+              'hidden items-center gap-3 rounded-2xl border px-4 py-2 text-xs font-semibold shadow-sm sm:inline-flex',
+              isSessionExpiringSoon
+                ? 'border-amber-300 bg-gradient-to-r from-amber-50 to-white text-amber-800'
+                : 'border-gray-200 bg-gradient-to-r from-white to-gray-50 text-gray-700',
               isSessionCritical ? 'animate-pulse' : '',
             ].join(' ')}
           >
-            {isSessionExpiringSoon ? `${t('layout.session_expiring_prefix')} ` : `${t('layout.session_prefix')} `}
-            {sessionCountdown}
+            <span className={['inline-flex h-8 w-8 items-center justify-center rounded-full border shadow-sm', isSessionExpiringSoon ? 'border-amber-200 bg-amber-100 text-amber-700' : 'border-gray-200 bg-white text-burnt-dark'].join(' ')}>
+              ⏱
+            </span>
+            <span className="leading-tight">
+              <span className="block text-[10px] font-bold uppercase tracking-[0.22em] text-gray-400">
+                {isSessionExpiringSoon ? t('layout.session_expiring_prefix') : t('layout.session_prefix')}
+              </span>
+              <span className="block text-sm font-extrabold tracking-[0.08em] text-gray-900">{sessionCountdown}</span>
+            </span>
           </div>
-
-          <button
-            type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
-            title={t('layout.notifications')}
-          >
-            🔔
-          </button>
 
           <LanguageSwitcher
             value={language}
@@ -240,31 +265,33 @@ const AdminHeaderBar = ({
                 setLanguageMenuOpen(false);
                 setUserMenuOpen(!userMenuOpen);
               }}
-              className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
+              className="inline-flex min-h-10 items-center gap-2 rounded-2xl border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm transition hover:bg-warm-50 hover:text-gray-900"
             >
-              <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-burnt/15 text-burnt-dark">{(sessionName ?? 'A').charAt(0)}</span>
-              <span className="hidden sm:block">{sessionName ?? t('layout.user_admin')}</span>
-              <ChevronDownIcon className="h-4 w-4" />
+              <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-burnt/15 text-burnt-dark">
+                {(sessionName ?? 'A').charAt(0)}
+              </span>
+              <span className="hidden sm:block font-semibold">{sessionName ?? t('layout.user_admin')}</span>
+              <ChevronDownIcon className="h-4 w-4 text-gray-500" />
             </button>
 
             {userMenuOpen && (
-              <div className="absolute right-0 top-full z-40 mt-2 w-64 max-w-[calc(100vw-1rem)] rounded-xl border border-gray-200 bg-white p-2 shadow-lg sm:w-56">
+              <div className="absolute right-0 top-full z-40 mt-2 w-64 max-w-[calc(100vw-1rem)] rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-md sm:w-56">
                 <Link
                   to="/admin/users"
-                  className="block rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  className="block rounded-xl px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
                   onClick={() => setUserMenuOpen(false)}
                 >
                   {t('layout.user_manage')}
                 </Link>
                 <Link
                   to="/admin/configs"
-                  className="block rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  className="block rounded-xl px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
                   onClick={() => setUserMenuOpen(false)}
                 >
                   {t('layout.system_preferences')}
                 </Link>
                 <button
-                  className="mt-1 w-full rounded-lg bg-burnt px-3 py-2 text-left text-sm font-semibold text-white hover:bg-burnt-dark"
+                  className="mt-1 w-full rounded-xl bg-burnt px-3 py-2.5 text-left text-sm font-semibold text-white hover:bg-burnt-dark"
                   type="button"
                   onClick={onLogout}
                 >
@@ -278,6 +305,117 @@ const AdminHeaderBar = ({
     </header>
   );
 };
+
+const AdminSidebar = ({
+  sidebarWidthClass,
+  isExpanded,
+  isHovered,
+  isMobileOpen,
+  setIsHovered,
+  search,
+  onSearchChange,
+  mainItems,
+  adminItems,
+  adminCollapsed,
+  onToggleAdminCollapsed,
+  renderNavItem,
+  t,
+}: AdminSidebarProps) => (
+  <aside
+    className={[
+      'fixed left-0 top-0 z-[70] flex h-screen flex-col border-r border-gray-200 bg-white/95 backdrop-blur-xl transition-all duration-300 ease-in-out',
+      sidebarWidthClass,
+      isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+    ].join(' ')}
+    onMouseEnter={() => {
+      if (!isExpanded) {
+        setIsHovered(true);
+      }
+    }}
+    onMouseLeave={() => {
+      setIsHovered(false);
+    }}
+  >
+    <div className="flex h-full flex-col px-4 py-5">
+      <div className={['flex items-center gap-3', !isExpanded && !isHovered && !isMobileOpen ? 'justify-center' : ''].join(' ')}>
+        <Link to="/admin" className="flex items-center gap-3 text-gray-900">
+          <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-burnt text-sm font-bold text-white shadow-sm">SM</span>
+          {(isExpanded || isHovered || isMobileOpen) && (
+            <span className="text-sm font-semibold tracking-wide">SCHEMUSIC</span>
+          )}
+        </Link>
+      </div>
+
+      {(isExpanded || isHovered || isMobileOpen) && (
+        <div className="mt-5">
+          <div className="relative">
+            <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-400">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7.33333 12.6667C10.2789 12.6667 12.6667 10.2789 12.6667 7.33333C12.6667 4.38781 10.2789 2 7.33333 2C4.38781 2 2 4.38781 2 7.33333C2 10.2789 4.38781 12.6667 7.33333 12.6667Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M14 14L11 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+            <input
+              type="text"
+              value={search}
+              onChange={(event) => onSearchChange(event.target.value)}
+              placeholder={t('common.search')}
+              className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2.5 pl-10 text-sm text-gray-700 outline-none transition focus:border-burnt focus:bg-white focus:ring-2 focus:ring-burnt/15"
+            />
+          </div>
+        </div>
+      )}
+
+      <nav className="mt-6 flex-1 overflow-y-auto pr-1">
+        <div className="flex flex-col gap-5">
+          <div>
+            {(isExpanded || isHovered || isMobileOpen) && (
+              <h2 className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">
+                {t('layout.overview_title')}
+              </h2>
+            )}
+            <div className="flex flex-col gap-2">
+              {mainItems.map((item) => renderNavItem(item))}
+            </div>
+          </div>
+
+          <div>
+            {(isExpanded || isHovered || isMobileOpen) && (
+              <h2 className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">
+                {t('layout.administration_title')}
+              </h2>
+            )}
+
+            <button
+              type="button"
+              onClick={onToggleAdminCollapsed}
+              className={[
+                'mb-2 flex w-full items-center gap-3 rounded-2xl border border-gray-200 bg-white px-3 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-warm-50 hover:text-gray-900',
+                !isExpanded && !isHovered && !isMobileOpen ? 'justify-center px-2.5' : 'justify-between',
+              ].join(' ')}
+            >
+              <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-burnt/10 text-burnt-dark">
+                {!isExpanded && !isHovered && !isMobileOpen ? <MoreDotIcon className="h-4 w-4" /> : <ListIcon className="h-4 w-4" />}
+              </span>
+              {(isExpanded || isHovered || isMobileOpen) && (
+                <>
+                  <span className="flex-1 text-left">{t('layout.admin_menu_button')}</span>
+                  <ChevronDownIcon className={['h-4 w-4 transition-transform', adminCollapsed ? '' : 'rotate-180'].join(' ')} />
+                </>
+              )}
+            </button>
+
+            {!adminCollapsed && (
+              <div className="flex flex-col gap-2">
+                {adminItems.map((item) => renderNavItem(item))}
+              </div>
+            )}
+          </div>
+        </div>
+      </nav>
+    </div>
+  </aside>
+);
 
 const LayoutContent = () => {
   const { session, logout, updateSessionLanguage } = useAdminAuth();
@@ -330,18 +468,52 @@ const LayoutContent = () => {
   const adminItems = filteredItems.filter((item) => item.group === 'admin');
 
   const desktopLeftSpacing = isExpanded || isHovered ? 'lg:ml-[280px]' : 'lg:ml-[92px]';
+  let sidebarWidthClass = 'w-[92px]';
+  if (isExpanded || isHovered) {
+    sidebarWidthClass = 'w-[280px]';
+  }
+  if (isMobileOpen) {
+    sidebarWidthClass = 'w-[280px] max-w-[86vw]';
+  }
 
   const handleSidebarToggle = () => {
-    (window.innerWidth >= 1024 ? toggleSidebar : toggleMobileSidebar)();
+    const hasMatchMedia = typeof globalThis.matchMedia === 'function';
+    const windowWidth = typeof globalThis.innerWidth === 'number' ? globalThis.innerWidth : 0;
+    const isDesktopFallback = windowWidth >= 1024;
+    const isDesktop = hasMatchMedia ? globalThis.matchMedia('(min-width: 1024px)').matches : isDesktopFallback;
+    (isDesktop ? toggleSidebar : toggleMobileSidebar)();
   };
 
-  const mainNavClass = ({ isActive }: { isActive: boolean }) => [
-    'group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition',
-    isActive
-      ? 'bg-burnt text-white shadow-sm'
-      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900',
-    !isExpanded && !isHovered ? 'justify-center' : '',
-  ].join(' ');
+  const renderNavItem = (item: NavigationItem) => (
+    <NavLink
+      key={item.to}
+      to={item.to}
+      end={item.to === '/admin'}
+      className={({ isActive }) => [
+        'group flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition',
+        isActive
+          ? 'bg-burnt/10 text-burnt-dark'
+          : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900',
+        !isExpanded && !isHovered && !isMobileOpen ? 'justify-center px-2.5' : '',
+      ].join(' ')}
+    >
+      {({ isActive }) => (
+        <>
+          <span
+            className={[
+              'inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition',
+              isActive
+                ? 'bg-burnt/15 text-burnt-dark'
+                : 'bg-gray-50 text-gray-600 group-hover:bg-burnt/10 group-hover:text-burnt-dark',
+            ].join(' ')}
+          >
+            {item.icon}
+          </span>
+          {(isExpanded || isHovered || isMobileOpen) && <span className="truncate">{item.label}</span>}
+        </>
+      )}
+    </NavLink>
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-slate-100" data-session-timeout-seconds={INACTIVITY_WINDOW_SECONDS}>
@@ -352,100 +524,25 @@ const LayoutContent = () => {
           type="button"
           onClick={closeMobileSidebar}
           aria-label="Fechar menu"
-          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+          className="fixed inset-0 z-[50] bg-black/40 lg:hidden"
         />
       )}
 
-      <aside
-        className={[
-          'fixed left-0 top-0 z-50 h-screen border-r border-gray-200 bg-white shadow-md transition-all duration-300',
-          isExpanded || isHovered ? 'w-[280px]' : 'w-[92px]',
-          isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
-        ].join(' ')}
-        onMouseEnter={() => {
-          if (!isExpanded) {
-            setIsHovered(true);
-          }
-        }}
-        onMouseLeave={() => {
-          setIsHovered(false);
-        }}
-      >
-        <div className="flex h-full flex-col">
-          <div className="flex h-[74px] items-center border-b border-gray-200 px-4">
-            <Link to="/admin" className="flex items-center gap-3 text-[#1E293B]">
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-burnt text-sm font-bold text-white">SM</span>
-              {(isExpanded || isHovered || isMobileOpen) && <span className="font-semibold tracking-wide">SCHEMUSIC ADMIN</span>}
-            </Link>
-          </div>
-
-          {(isExpanded || isHovered || isMobileOpen) && (
-            <div className="px-4 pt-4">
-              <input
-                type="text"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder={t('common.search')}
-                className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 outline-none transition focus:border-burnt focus:bg-white focus:ring-2 focus:ring-burnt/15"
-              />
-            </div>
-          )}
-
-          <nav className="flex-1 overflow-y-auto px-3 py-4">
-            {(isExpanded || isHovered || isMobileOpen) && (
-              <p className="px-2 pb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">{t('layout.overview_title')}</p>
-            )}
-            <div className="space-y-1">
-              {mainItems.map((item) => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  end={item.to === '/admin'}
-                  className={mainNavClass}
-                >
-                  <span className="inline-flex h-5 w-5 items-center justify-center">{item.icon}</span>
-                  {(isExpanded || isHovered || isMobileOpen) && <span>{item.label}</span>}
-                </NavLink>
-              ))}
-            </div>
-
-            <div className="mt-4 border-t border-gray-200 pt-4">
-              {(isExpanded || isHovered || isMobileOpen) && (
-                <p className="px-2 pb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">{t('layout.administration_title')}</p>
-              )}
-
-              <button
-                type="button"
-                onClick={() => setAdminCollapsed((current) => !current)}
-                className={[
-                  'mb-2 flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100',
-                  !isExpanded && !isHovered ? 'justify-center' : '',
-                ].join(' ')}
-              >
-                {(isExpanded || isHovered || isMobileOpen) ? <span>{t('layout.admin_menu_button')}</span> : <MoreDotIcon className="h-5 w-5" />}
-                {(isExpanded || isHovered || isMobileOpen) && (
-                  <ChevronDownIcon className={['h-4 w-4 transition-transform', adminCollapsed ? '' : 'rotate-180'].join(' ')} />
-                )}
-              </button>
-
-              {!adminCollapsed && (
-                <div className="space-y-1">
-                  {adminItems.map((item) => (
-                    <NavLink
-                      key={item.to}
-                      to={item.to}
-                      className={mainNavClass}
-                    >
-                      <span className="inline-flex h-5 w-5 items-center justify-center">{item.icon}</span>
-                      {(isExpanded || isHovered || isMobileOpen) && <span>{item.label}</span>}
-                    </NavLink>
-                  ))}
-                </div>
-              )}
-            </div>
-          </nav>
-        </div>
-      </aside>
+      <AdminSidebar
+        sidebarWidthClass={sidebarWidthClass}
+        isExpanded={isExpanded}
+        isHovered={isHovered}
+        isMobileOpen={isMobileOpen}
+        setIsHovered={setIsHovered}
+        search={search}
+        onSearchChange={setSearch}
+        mainItems={mainItems}
+        adminItems={adminItems}
+        adminCollapsed={adminCollapsed}
+        onToggleAdminCollapsed={() => setAdminCollapsed((current) => !current)}
+        renderNavItem={renderNavItem}
+        t={t}
+      />
 
       <div className={['transition-all duration-300', desktopLeftSpacing].join(' ')}>
         <AdminHeaderBar
@@ -467,7 +564,7 @@ const LayoutContent = () => {
         />
 
         <main className="mx-auto max-w-screen-2xl p-4 md:p-6">
-          <div className="rounded-xl border border-gray-200 bg-white/95 p-4 shadow-sm md:p-6">
+          <div className="rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm md:p-6">
             <Outlet />
           </div>
         </main>

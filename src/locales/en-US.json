@@ -179,6 +179,7 @@
     "save": "Save",
     "delete": "Delete",
     "edit": "Edit",
+    "actions_label": "Actions",
     "close": "Close",
     "search": "Search module"
   },
@@ -217,7 +218,8 @@
     "no_items": "No items found",
     "error_fetch": "Failed to load access lists.",
     "error_create": "Unable to create access list item.",
-    "error_inativar": "Failed to deactivate list item."
+    "error_inativar": "Failed to deactivate list item.",
+    "button_inativar": "Deactivate"
   },
   "access_logs": {
     "page_title": "Access Logs",

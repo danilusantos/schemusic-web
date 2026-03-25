@@ -34,14 +34,14 @@ export const AdminCardContextMenu = ({ items }: AdminCardContextMenuProps) => {
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
-        className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-warm-300 bg-white text-warm-700 transition hover:bg-warm-50"
+        className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-white text-warm-700 transition hover:bg-warm-50"
         aria-label="Acoes"
       >
         <MoreDotIcon className="h-5 w-5" />
       </button>
 
       {open && (
-        <div className="absolute right-0 top-11 z-30 w-64 rounded-xl border border-warm-300 bg-white p-2 shadow-lg">
+        <div className="absolute right-0 top-11 z-30 w-64 rounded-2xl bg-white p-2 shadow-theme-md">
           {items.map((item) => (
             <button
               key={item.label}

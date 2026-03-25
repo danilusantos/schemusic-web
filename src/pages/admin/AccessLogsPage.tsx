@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLabels } from '../../context/LabelsContext';
 import { adminService } from '../../services/adminService';
 import type { AdminAccessLog } from '../../types/admin';
 import { ListIcon, ArrowUpIcon } from '../../icons';
@@ -18,6 +19,7 @@ const formatDate = (value: string) => {
 };
 
 export const AccessLogsPage = () => {
+  const { t, tf } = useLabels();
   const [logs, setLogs] = useState<AdminAccessLog[]>([]);
   const [limite, setLimite] = useState(50);
   const [error, setError] = useState('');
@@ -28,7 +30,7 @@ export const AccessLogsPage = () => {
       const data = await adminService.listarLogs(limit);
       setLogs(data);
     } catch {
-      setError('Falha ao carregar logs de acesso.');
+      setError(t('access_logs.error_fetch'));
     }
   };
 
@@ -57,7 +59,7 @@ export const AccessLogsPage = () => {
   let logsContent;
   if (logs.length === 0) {
     logsContent = (
-      <div className="py-xl text-center"><p className="text-warm-700">Nenhum log encontrado</p></div>
+      <div className="py-xl text-center"><p className="text-warm-700">{t('access_logs.no_logs')}</p></div>
     );
   } else {
     logsContent = (
@@ -66,11 +68,11 @@ export const AccessLogsPage = () => {
           <thead>
             <tr>
               <th>ID</th>
-              <th>Metodo</th>
-              <th>Caminho</th>
+              <th>{t('access_logs.metodo_label')}</th>
+              <th>{t('dashboard.table_path')}</th>
               <th>IP</th>
               <th>User ID</th>
-              <th>Status</th>
+              <th>{t('access_logs.status_label')}</th>
               <th>Data/Hora</th>
             </tr>
           </thead>
@@ -112,17 +114,26 @@ export const AccessLogsPage = () => {
         </div>
       )}
 
+      <div className="ds-card bg-gradient-to-r from-white to-warm-50/80">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-burnt">{t('access_logs.page_title')}</p>
+        <h2 className="ds-page-title mt-2 text-2xl">{t('access_logs.page_title')}</h2>
+        <p className="ds-page-subtitle mt-2 max-w-3xl">{t('access_logs.page_subtitle')}</p>
+      </div>
+
       <div className="ds-card space-y-lg">
         <div className="flex items-start justify-between gap-md">
           <div className="flex items-center gap-2">
             <ListIcon className="h-5 w-5 text-burnt" />
-            <h2 className="ds-card-title">Ultimos Acessos</h2>
+            <div>
+              <h2 className="ds-card-title">{t('access_logs.page_title')}</h2>
+              <p className="text-sm text-warm-600">{t('access_logs.page_subtitle')}</p>
+            </div>
           </div>
 
           <AdminCardContextMenu
             items={[
               {
-                label: 'Atualizar agora',
+                label: t('access_logs.limit_button'),
                 icon: <ArrowUpIcon className="h-4 w-4 text-burnt" />,
                 onClick: () => {
                   void carregar();
@@ -134,7 +145,7 @@ export const AccessLogsPage = () => {
 
         <div className="flex flex-wrap items-end justify-between gap-md">
           <div className="w-full max-w-xs">
-            <label htmlFor="limite" className="ds-label">Mostrar ultimos</label>
+            <label htmlFor="limite" className="ds-label">{t('access_logs.limit_label')}</label>
             <div className="flex gap-md">
               <input
                 id="limite"
@@ -150,11 +161,11 @@ export const AccessLogsPage = () => {
                 onClick={() => void carregar()}
                 className="ds-btn-primary"
               >
-                Atualizar
+                {t('access_logs.limit_button')}
               </button>
             </div>
           </div>
-          <p className="w-full text-sm text-warm-600 sm:w-auto">Exibindo {logs.length} registro(s)</p>
+          <p className="w-full text-sm text-warm-600 sm:w-auto">{tf('access_logs.total_logs', { count: logs.length })}</p>
         </div>
 
         {logsContent}

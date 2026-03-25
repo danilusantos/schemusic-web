@@ -47,11 +47,14 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-warm-50 to-warm-100 p-6 grid place-items-center">
-      <form className="ds-card w-full max-w-md space-y-4" onSubmit={handleSubmit}>
-        <div>
-          <h1 className="ds-page-title text-2xl">{t('login.title')}</h1>
-          <p className="ds-page-subtitle mt-1">{t('login.subtitle')}</p>
+    <div className="login-shell">
+      <form className="login-card w-full max-w-md" onSubmit={handleSubmit}>
+        <div className="mb-2 flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center bg-burnt text-lg font-bold text-white">SM</div>
+          <div>
+            <h1 className="text-2xl font-bold text-warm-900">{t('login.title')}</h1>
+            <p className="text-sm text-warm-600">{t('login.subtitle')}</p>
+          </div>
         </div>
 
         <div>

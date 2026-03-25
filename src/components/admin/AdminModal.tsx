@@ -33,7 +33,7 @@ export const AdminModal = ({
         disabled={isLoading}
       />
 
-      <div className="relative z-10 w-full max-w-2xl rounded-2xl border border-warm-300 bg-white p-6 shadow-xl">
+      <div className="relative z-10 w-full max-w-2xl rounded-2xl bg-white p-6 shadow-theme-md">
         <div className="mb-5 flex items-start justify-between gap-3">
           <div>
             <h3 className="text-xl font-bold text-warm-900">{title}</h3>
@@ -41,16 +41,16 @@ export const AdminModal = ({
           </div>
           <button
             type="button"
-            className="rounded-md border border-warm-300 px-2.5 py-1 text-sm font-semibold text-warm-700 hover:bg-warm-50 disabled:opacity-50"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-warm-100 text-warm-700 transition hover:bg-warm-200 disabled:opacity-50"
             onClick={onClose}
             disabled={isLoading}
           >
-            X
+            <span className="text-lg leading-none">×</span>
           </button>
         </div>
 
         {error && (
-          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          <div className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800">
             <p>{error}</p>
           </div>
         )}
@@ -60,7 +60,7 @@ export const AdminModal = ({
         </div>
 
         {isLoading && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center rounded-2xl bg-white/40 backdrop-blur-sm">
+          <div className="absolute inset-0 z-50 flex items-center justify-center rounded-2xl bg-white/55 backdrop-blur-sm">
             <div className="flex flex-col items-center gap-3">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-warm-300 border-t-burnt" />
               <p className="text-sm font-semibold text-warm-700">Processando...</p>

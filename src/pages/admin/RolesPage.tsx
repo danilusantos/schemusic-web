@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type * as React from 'react';
+import { useLabels } from '../../context/LabelsContext';
 import { adminService } from '../../services/adminService';
 import type { AdminRole } from '../../types/admin';
 import { ListIcon, PlusIcon, TrashIcon } from '../../icons';
@@ -7,6 +8,7 @@ import { AdminModal } from '../../components/admin/AdminModal';
 import { AdminCardContextMenu } from '../../components/admin/AdminCardContextMenu';
 
 export const RolesPage = () => {
+  const { t, tf } = useLabels();
   const [roles, setRoles] = useState<AdminRole[]>([]);
   const [nome, setNome] = useState('');
   const [descricao, setDescricao] = useState('');
@@ -27,7 +29,7 @@ export const RolesPage = () => {
       const data = await adminService.listarRoles();
       setRoles(data);
     } catch {
-      setError('Falha ao carregar roles.');
+      setError(t('roles.error_fetch'));
     }
   };
 
@@ -48,7 +50,7 @@ export const RolesPage = () => {
       setIsCreateModalOpen(false);
       await carregar();
     } catch {
-      setCreateError('Nao foi possivel criar role.');
+      setCreateError(t('roles.error_create'));
     } finally {
       setIsCreateLoading(false);
     }
@@ -59,7 +61,7 @@ export const RolesPage = () => {
       await adminService.excluirRole(idRole);
       await carregar();
     } catch {
-      setError('Nao foi possivel excluir role. Verifique vinculacoes.');
+      setError(t('roles.error_delete'));
     }
   };
 
@@ -84,7 +86,7 @@ export const RolesPage = () => {
   let rolesContent;
   if (filteredRoles.length === 0) {
     rolesContent = (
-      <div className="py-xl text-center"><p className="text-warm-700">Nenhuma role encontrada</p></div>
+      <div className="py-xl text-center"><p className="text-warm-700">{t('roles.no_roles')}</p></div>
     );
   } else {
     rolesContent = (
@@ -93,10 +95,10 @@ export const RolesPage = () => {
           <thead>
             <tr>
               <th>ID</th>
-              <th>Nome</th>
-              <th>Descricao</th>
-              <th>Status</th>
-              <th className="text-center">Acoes</th>
+              <th>{t('roles.nome_label')}</th>
+              <th>{t('roles.descricao_label')}</th>
+              <th>{t('users.status_filter_label')}</th>
+              <th className="text-center">{t('common.actions_label')}</th>
             </tr>
           </thead>
           <tbody>
@@ -110,7 +112,7 @@ export const RolesPage = () => {
                     'inline-block rounded-full px-md py-xs text-xs font-semibold',
                     role.ativo ? 'bg-burnt/15 text-burnt-dark' : 'bg-warm-100 text-warm-700',
                   ].join(' ')}>
-                    {role.ativo ? 'Ativa' : 'Inativa'}
+                    {role.ativo ? t('roles.status_ativas') : t('roles.status_inativas')}
                   </span>
                 </td>
                 <td className="text-center">
@@ -120,7 +122,7 @@ export const RolesPage = () => {
                     className="inline-flex items-center gap-1 rounded-md bg-burnt px-md py-xs text-xs font-semibold text-white transition-colors hover:bg-burnt-dark"
                   >
                     <TrashIcon className="h-4 w-4" />
-                    Excluir
+                    {t('roles.button_delete')}
                   </button>
                 </td>
               </tr>
@@ -139,17 +141,26 @@ export const RolesPage = () => {
         </div>
       )}
 
+      <div className="ds-card bg-gradient-to-r from-white to-warm-50/80">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-burnt">{t('roles.page_title')}</p>
+        <h2 className="ds-page-title mt-2 text-2xl">{t('roles.page_title')}</h2>
+        <p className="ds-page-subtitle mt-2 max-w-3xl">{t('roles.page_subtitle')}</p>
+      </div>
+
       <div className="ds-card space-y-lg">
         <div className="flex items-start justify-between gap-md">
           <div className="flex items-center gap-2">
             <ListIcon className="h-5 w-5 text-burnt" />
-            <h2 className="ds-card-title">Lista de Roles</h2>
+            <div>
+              <h2 className="ds-card-title">{t('roles.list_title')}</h2>
+              <p className="text-sm text-warm-600">{t('roles.page_subtitle')}</p>
+            </div>
           </div>
 
           <AdminCardContextMenu
             items={[
               {
-                label: 'Criar Role',
+                label: t('roles.create_form_title'),
                 icon: <PlusIcon className="h-4 w-4 text-burnt" />,
                 onClick: () => setIsCreateModalOpen(true),
               },
@@ -160,31 +171,31 @@ export const RolesPage = () => {
         <div className="flex flex-wrap items-end justify-between gap-md">
           <div className="grid w-full gap-md sm:w-auto sm:grid-cols-2">
             <div>
-              <label htmlFor="roles-status-filter" className="ds-label">Status</label>
+              <label htmlFor="roles-status-filter" className="ds-label">{t('roles.status_filter_label')}</label>
               <select
                 id="roles-status-filter"
                 className="ds-select min-w-[180px]"
                 value={statusFilter}
                 onChange={(event) => setStatusFilter(event.target.value as 'TODAS' | 'ATIVAS' | 'INATIVAS')}
               >
-                <option value="TODAS">Todas</option>
-                <option value="ATIVAS">Ativas</option>
-                <option value="INATIVAS">Inativas</option>
+                <option value="TODAS">{t('roles.status_todas')}</option>
+                <option value="ATIVAS">{t('roles.status_ativas')}</option>
+                <option value="INATIVAS">{t('roles.status_inativas')}</option>
               </select>
             </div>
             <div>
-              <label htmlFor="roles-search-filter" className="ds-label">Buscar</label>
+              <label htmlFor="roles-search-filter" className="ds-label">{t('roles.nome_filter_label')}</label>
               <input
                 id="roles-search-filter"
                 type="text"
                 className="ds-input min-w-[220px]"
-                placeholder="Buscar por nome ou descricao"
+                placeholder={t('roles.nome_filter_placeholder')}
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
               />
             </div>
           </div>
-          <p className="w-full text-sm text-warm-600 sm:w-auto">Total: {filteredRoles.length} role(s)</p>
+          <p className="w-full text-sm text-warm-600 sm:w-auto">{tf('roles.total_roles', { count: filteredRoles.length })}</p>
         </div>
 
         {rolesContent}
@@ -192,8 +203,8 @@ export const RolesPage = () => {
 
       <AdminModal
         isOpen={isCreateModalOpen}
-        title="Criar Role"
-        subtitle="Defina um novo perfil de acesso"
+        title={t('roles.create_form_title')}
+        subtitle={t('roles.create_form_subtitle')}
         onClose={() => setIsCreateModalOpen(false)}
         isLoading={isCreateLoading}
         error={createError}
@@ -201,7 +212,7 @@ export const RolesPage = () => {
         <form onSubmit={criarRole} className="space-y-lg">
           <div className="space-y-md">
             <div>
-              <label htmlFor="role-nome" className="ds-label">Nome da Role</label>
+              <label htmlFor="role-nome" className="ds-label">{t('roles.nome_label')}</label>
               <input
                 id="role-nome"
                 type="text"
@@ -210,12 +221,12 @@ export const RolesPage = () => {
                 required
                 disabled={isCreateLoading}
                 className="ds-input disabled:cursor-not-allowed disabled:opacity-60"
-                placeholder="Ex: Gerenciador de Usuarios"
+                placeholder={t('roles.nome_placeholder')}
               />
             </div>
 
             <div>
-              <label htmlFor="role-descricao" className="ds-label">Descricao</label>
+              <label htmlFor="role-descricao" className="ds-label">{t('roles.descricao_label')}</label>
               <input
                 id="role-descricao"
                 type="text"
@@ -223,7 +234,7 @@ export const RolesPage = () => {
                 onChange={(e) => setDescricao(e.target.value)}
                 disabled={isCreateLoading}
                 className="ds-input disabled:cursor-not-allowed disabled:opacity-60"
-                placeholder="Ex: Pode gerenciar usuarios e roles"
+                placeholder={t('roles.descricao_placeholder')}
               />
             </div>
 
@@ -235,7 +246,7 @@ export const RolesPage = () => {
                 disabled={isCreateLoading}
                 className="h-4 w-4 accent-burnt disabled:cursor-not-allowed"
               />
-              <span className="text-sm font-semibold text-warm-800">Role ativa</span>
+              <span className="text-sm font-semibold text-warm-800">{t('roles.ativo_label')}</span>
             </label>
           </div>
 
@@ -244,7 +255,7 @@ export const RolesPage = () => {
             disabled={isCreateLoading}
             className="ds-btn-primary w-full disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isCreateLoading ? 'Carregando...' : 'Criar Role'}
+              {isCreateLoading ? t('common.loading') : t('roles.create_button')}
           </button>
         </form>
       </AdminModal>

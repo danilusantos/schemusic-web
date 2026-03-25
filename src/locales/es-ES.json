@@ -179,6 +179,7 @@
     "save": "Guardar",
     "delete": "Eliminar",
     "edit": "Editar",
+    "actions_label": "Acciones",
     "close": "Cerrar",
     "search": "Buscar modulo"
   },
@@ -217,7 +218,8 @@
     "no_items": "No se encontró ningún ítem",
     "error_fetch": "Error al cargar listas de acceso.",
     "error_create": "No fue posible crear ítem de lista de acceso.",
-    "error_inativar": "Error al inactivar ítem de la lista."
+    "error_inativar": "Error al inactivar ítem de la lista.",
+    "button_inativar": "Inactivar"
   },
   "access_logs": {
     "page_title": "Registros de Acceso",

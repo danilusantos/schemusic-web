@@ -63,7 +63,7 @@ export const GlobalLoading = () => {
       }`}
     >
       <div className="flex items-center gap-3">
-        <span className="inline-block h-20 w-20 animate-spin rounded-full border-8 border-warm-300 border-t-burnt" />
+        <span className="inline-block h-14 w-14 animate-spin rounded-full border-4 border-warm-300 border-t-burnt" />
       </div>
     </div>
   );

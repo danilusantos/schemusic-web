@@ -1,9 +1,12 @@
-import { useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLabels } from '../../context/LabelsContext';
 import { adminService } from '../../services/adminService';
-import { AccessLineChart } from '../../components/admin/AccessLineChart';
 import type { AdminAccessLog, AdminAccessSeriesPoint, AdminDashboardSummary } from '../../types/admin';
+
+const AccessLineChart = lazy(() =>
+  import('../../components/admin/AccessLineChart').then((module) => ({ default: module.AccessLineChart })),
+);
 
 type SeriePeriodo = 'week' | 'month' | 'year';
 
@@ -122,12 +125,16 @@ export const DashboardPage = () => {
       return <p className="text-sm text-warm-600">{t('dashboard.no_series_data')}</p>;
     }
 
-    return <AccessLineChart points={seriesPoints} />;
+    return (
+      <Suspense fallback={<p className="text-sm text-warm-600">{t('dashboard.loading')}</p>}>
+        <AccessLineChart points={seriesPoints} />
+      </Suspense>
+    );
   };
 
   return (
     <section className="ds-page">
-      <div className="ds-card bg-gradient-to-r from-white to-warm-50">
+      <div className="ds-card bg-gradient-to-r from-white to-warm-50/80">
         <p className="text-xs font-semibold uppercase tracking-widest text-burnt">{t('dashboard.section_title')}</p>
         <h1 className="ds-page-title mt-2">
           {t('dashboard.main_title')}

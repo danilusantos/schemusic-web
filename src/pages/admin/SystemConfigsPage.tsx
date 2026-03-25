@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type * as React from 'react';
+import { useLabels } from '../../context/LabelsContext';
 import { adminService } from '../../services/adminService';
 import type { AdminSystemConfig } from '../../types/admin';
 import { ListIcon, PlusIcon, TrashIcon } from '../../icons';
@@ -7,6 +8,7 @@ import { AdminModal } from '../../components/admin/AdminModal';
 import { AdminCardContextMenu } from '../../components/admin/AdminCardContextMenu';
 
 export const SystemConfigsPage = () => {
+  const { t, tf } = useLabels();
   const [configs, setConfigs] = useState<AdminSystemConfig[]>([]);
   const [chave, setChave] = useState('');
   const [valor, setValor] = useState('');
@@ -28,7 +30,7 @@ export const SystemConfigsPage = () => {
       const data = await adminService.listarConfigs();
       setConfigs(data);
     } catch {
-      setError('Falha ao carregar configuracoes do sistema.');
+      setError(t('configs.error_fetch'));
     }
   };
 
@@ -50,7 +52,7 @@ export const SystemConfigsPage = () => {
       setIsCreateModalOpen(false);
       await carregar();
     } catch {
-      setCreateError('Nao foi possivel criar configuracao.');
+      setCreateError(t('configs.error_create'));
     } finally {
       setIsCreateLoading(false);
     }
@@ -61,7 +63,7 @@ export const SystemConfigsPage = () => {
       await adminService.excluirConfig(idConfig);
       await carregar();
     } catch {
-      setError('Nao foi possivel excluir configuracao.');
+      setError(t('configs.error_delete'));
     }
   };
 
@@ -87,7 +89,7 @@ export const SystemConfigsPage = () => {
   let configsContent;
   if (filteredConfigs.length === 0) {
     configsContent = (
-      <div className="py-xl text-center"><p className="text-warm-700">Nenhuma configuracao encontrada</p></div>
+      <div className="py-xl text-center"><p className="text-warm-700">{t('configs.no_configs')}</p></div>
     );
   } else {
     configsContent = (
@@ -96,10 +98,10 @@ export const SystemConfigsPage = () => {
           <thead>
             <tr>
               <th>ID</th>
-              <th>Chave</th>
-              <th>Valor</th>
-              <th>Descricao</th>
-              <th className="text-center">Acoes</th>
+              <th>{t('configs.chave_label')}</th>
+              <th>{t('configs.valor_label')}</th>
+              <th>{t('configs.descricao_label')}</th>
+              <th className="text-center">{t('common.actions_label')}</th>
             </tr>
           </thead>
           <tbody>
@@ -116,7 +118,7 @@ export const SystemConfigsPage = () => {
                     className="inline-flex items-center gap-1 rounded-md bg-burnt px-md py-xs text-xs font-semibold text-white transition-colors hover:bg-burnt-dark"
                   >
                     <TrashIcon className="h-4 w-4" />
-                    Excluir
+                    {t('configs.button_delete')}
                   </button>
                 </td>
               </tr>
@@ -135,17 +137,26 @@ export const SystemConfigsPage = () => {
         </div>
       )}
 
+      <div className="ds-card bg-gradient-to-r from-white to-warm-50/80">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-burnt">{t('configs.page_title')}</p>
+        <h2 className="ds-page-title mt-2 text-2xl">{t('configs.page_title')}</h2>
+        <p className="ds-page-subtitle mt-2 max-w-3xl">{t('configs.page_subtitle')}</p>
+      </div>
+
       <div className="ds-card space-y-lg">
         <div className="flex items-start justify-between gap-md">
           <div className="flex items-center gap-2">
             <ListIcon className="h-5 w-5 text-burnt" />
-            <h2 className="ds-card-title">Configuracoes Ativas</h2>
+            <div>
+              <h2 className="ds-card-title">{t('configs.list_title')}</h2>
+              <p className="text-sm text-warm-600">{t('configs.page_subtitle')}</p>
+            </div>
           </div>
 
           <AdminCardContextMenu
             items={[
               {
-                label: 'Nova Configuracao',
+                label: t('configs.create_form_title'),
                 icon: <PlusIcon className="h-4 w-4 text-burnt" />,
                 onClick: () => setIsCreateModalOpen(true),
               },
@@ -156,31 +167,31 @@ export const SystemConfigsPage = () => {
         <div className="flex flex-wrap items-end justify-between gap-md">
           <div className="grid w-full gap-md sm:w-auto sm:grid-cols-2">
             <div>
-              <label htmlFor="configs-status-filter" className="ds-label">Status</label>
+              <label htmlFor="configs-status-filter" className="ds-label">{t('configs.status_filter_label')}</label>
               <select
                 id="configs-status-filter"
                 className="ds-select min-w-[180px]"
                 value={statusFilter}
                 onChange={(event) => setStatusFilter(event.target.value as 'TODAS' | 'ATIVAS' | 'INATIVAS')}
               >
-                <option value="TODAS">Todas</option>
-                <option value="ATIVAS">Ativas</option>
-                <option value="INATIVAS">Inativas</option>
+                <option value="TODAS">{t('configs.status_todas')}</option>
+                <option value="ATIVAS">{t('configs.status_ativas')}</option>
+                <option value="INATIVAS">{t('configs.status_inativas')}</option>
               </select>
             </div>
             <div>
-              <label htmlFor="configs-search-filter" className="ds-label">Buscar</label>
+              <label htmlFor="configs-search-filter" className="ds-label">{t('configs.search_filter_label')}</label>
               <input
                 id="configs-search-filter"
                 type="text"
                 className="ds-input min-w-[220px]"
-                placeholder="Buscar por chave ou valor"
+                placeholder={t('configs.search_filter_placeholder')}
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
               />
             </div>
           </div>
-          <p className="w-full text-sm text-warm-600 sm:w-auto">Total: {filteredConfigs.length} config(s)</p>
+          <p className="w-full text-sm text-warm-600 sm:w-auto">{tf('configs.total_configs', { count: filteredConfigs.length })}</p>
         </div>
 
         {configsContent}
@@ -188,8 +199,8 @@ export const SystemConfigsPage = () => {
 
       <AdminModal
         isOpen={isCreateModalOpen}
-        title="Nova Configuracao"
-        subtitle="Adicione novo parametro ao sistema"
+        title={t('configs.create_form_title')}
+        subtitle={t('configs.create_form_subtitle')}
         onClose={() => setIsCreateModalOpen(false)}
         isLoading={isCreateLoading}
         error={createError}
@@ -197,7 +208,7 @@ export const SystemConfigsPage = () => {
         <form onSubmit={criarConfig} className="space-y-lg">
           <div className="space-y-md">
             <div>
-              <label htmlFor="config-chave" className="ds-label">Chave</label>
+              <label htmlFor="config-chave" className="ds-label">{t('configs.chave_label')}</label>
               <input
                 id="config-chave"
                 type="text"
@@ -206,12 +217,12 @@ export const SystemConfigsPage = () => {
                 required
                 disabled={isCreateLoading}
                 className="ds-input disabled:cursor-not-allowed disabled:opacity-60"
-                placeholder="Ex: MAX_UPLOAD_SIZE"
+                placeholder={t('configs.chave_placeholder')}
               />
             </div>
 
             <div>
-              <label htmlFor="config-valor" className="ds-label">Valor</label>
+              <label htmlFor="config-valor" className="ds-label">{t('configs.valor_label')}</label>
               <input
                 id="config-valor"
                 type="text"
@@ -220,12 +231,12 @@ export const SystemConfigsPage = () => {
                 required
                 disabled={isCreateLoading}
                 className="ds-input disabled:cursor-not-allowed disabled:opacity-60"
-                placeholder="Ex: 5242880"
+                placeholder={t('configs.valor_placeholder')}
               />
             </div>
 
             <div>
-              <label htmlFor="config-descricao" className="ds-label">Descricao</label>
+              <label htmlFor="config-descricao" className="ds-label">{t('configs.descricao_label')}</label>
               <input
                 id="config-descricao"
                 type="text"
@@ -233,7 +244,7 @@ export const SystemConfigsPage = () => {
                 onChange={(e) => setDescricao(e.target.value)}
                 disabled={isCreateLoading}
                 className="ds-input disabled:cursor-not-allowed disabled:opacity-60"
-                placeholder="Ex: Tamanho maximo de upload em bytes"
+                placeholder={t('configs.descricao_placeholder')}
               />
             </div>
 
@@ -245,7 +256,7 @@ export const SystemConfigsPage = () => {
                 disabled={isCreateLoading}
                 className="h-4 w-4 accent-burnt disabled:cursor-not-allowed"
               />
-              <span className="text-sm font-semibold text-warm-800">Configuracao ativa</span>
+              <span className="text-sm font-semibold text-warm-800">{t('configs.ativo_label')}</span>
             </label>
           </div>
 
@@ -254,7 +265,7 @@ export const SystemConfigsPage = () => {
             disabled={isCreateLoading}
             className="ds-btn-primary w-full disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isCreateLoading ? 'Carregando...' : 'Criar Configuracao'}
+              {isCreateLoading ? t('common.loading') : t('configs.create_button')}
           </button>
         </form>
       </AdminModal>

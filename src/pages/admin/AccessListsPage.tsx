@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type * as React from 'react';
+import { useLabels } from '../../context/LabelsContext';
 import { adminService } from '../../services/adminService';
 import type { AdminAccessList } from '../../types/admin';
 import { ListIcon, PlusIcon, TrashIcon } from '../../icons';
@@ -7,6 +8,7 @@ import { AdminModal } from '../../components/admin/AdminModal';
 import { AdminCardContextMenu } from '../../components/admin/AdminCardContextMenu';
 
 export const AccessListsPage = () => {
+  const { t, tf } = useLabels();
   const [listas, setListas] = useState<AdminAccessList[]>([]);
   const [tipoLista, setTipoLista] = useState('WHITELIST');
   const [tipoAlvo, setTipoAlvo] = useState('IP');
@@ -40,7 +42,7 @@ export const AccessListsPage = () => {
       });
       setListas(data);
     } catch {
-      setError('Falha ao carregar listas de acesso.');
+      setError(t('access_lists.error_fetch'));
     }
   };
 
@@ -67,7 +69,7 @@ export const AccessListsPage = () => {
       setIsCreateModalOpen(false);
       await carregar();
     } catch {
-      setCreateError('Nao foi possivel criar item de lista de acesso.');
+      setCreateError(t('access_lists.error_create'));
     } finally {
       setIsCreateLoading(false);
     }
@@ -78,7 +80,7 @@ export const AccessListsPage = () => {
       await adminService.inativarListaAcesso(idListaAcesso);
       await carregar();
     } catch {
-      setError('Falha ao inativar item da lista.');
+      setError(t('access_lists.error_inativar'));
     }
   };
 
@@ -98,7 +100,7 @@ export const AccessListsPage = () => {
   let listasContent;
   if (filteredListas.length === 0) {
     listasContent = (
-      <div className="py-xl text-center"><p className="text-warm-700">Nenhum item encontrado</p></div>
+      <div className="py-xl text-center"><p className="text-warm-700">{t('access_lists.no_items')}</p></div>
     );
   } else {
     listasContent = (
@@ -107,12 +109,12 @@ export const AccessListsPage = () => {
           <thead>
             <tr>
               <th>ID</th>
-              <th>Lista</th>
-              <th>Tipo</th>
-              <th>Valor</th>
-              <th>Observacao</th>
-              <th>Status</th>
-              <th className="text-center">Acoes</th>
+              <th>{t('access_lists.lista_filter_label')}</th>
+              <th>{t('access_lists.tipo_alvo_label')}</th>
+              <th>{t('access_lists.valor_alvo_label')}</th>
+              <th>{t('access_lists.observacao_label')}</th>
+              <th>{t('users.status_filter_label')}</th>
+              <th className="text-center">{t('common.actions_label')}</th>
             </tr>
           </thead>
           <tbody>
@@ -135,7 +137,7 @@ export const AccessListsPage = () => {
                     'inline-block rounded-full px-md py-xs text-xs font-semibold',
                     item.ativo ? 'bg-burnt/15 text-burnt-dark' : 'bg-warm-100 text-warm-700',
                   ].join(' ')}>
-                    {item.ativo ? 'Ativo' : 'Inativo'}
+                    {item.ativo ? t('access_lists.status_ativos') : t('access_lists.status_inativos')}
                   </span>
                 </td>
                 <td className="text-center">
@@ -146,7 +148,7 @@ export const AccessListsPage = () => {
                     className="inline-flex items-center gap-1 rounded-md bg-burnt px-md py-xs text-xs font-semibold text-white transition-colors hover:bg-burnt-dark disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <TrashIcon className="h-4 w-4" />
-                    Inativar
+                    {t('access_lists.button_inativar')}
                   </button>
                 </td>
               </tr>
@@ -165,17 +167,26 @@ export const AccessListsPage = () => {
         </div>
       )}
 
+      <div className="ds-card bg-gradient-to-r from-white to-warm-50/80">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-burnt">{t('access_lists.page_title')}</p>
+        <h2 className="ds-page-title mt-2 text-2xl">{t('access_lists.page_title')}</h2>
+        <p className="ds-page-subtitle mt-2 max-w-3xl">{t('access_lists.page_subtitle')}</p>
+      </div>
+
       <div className="ds-card space-y-lg">
         <div className="flex items-start justify-between gap-md">
           <div className="flex items-center gap-2">
             <ListIcon className="h-5 w-5 text-burnt" />
-            <h2 className="ds-card-title">Itens Cadastrados</h2>
+            <div>
+              <h2 className="ds-card-title">{t('access_lists.list_title')}</h2>
+              <p className="text-sm text-warm-600">{t('access_lists.page_subtitle')}</p>
+            </div>
           </div>
 
           <AdminCardContextMenu
             items={[
               {
-                label: 'Novo Item de Acesso',
+                label: t('access_lists.create_form_title'),
                 icon: <PlusIcon className="h-4 w-4 text-burnt" />,
                 onClick: () => setIsCreateModalOpen(true),
               },
@@ -186,44 +197,44 @@ export const AccessListsPage = () => {
         <div className="flex flex-wrap items-end justify-between gap-md">
           <div className="grid w-full gap-md sm:w-auto sm:grid-cols-3">
             <div>
-              <label htmlFor="listas-lista-filter" className="ds-label">Lista</label>
+              <label htmlFor="listas-lista-filter" className="ds-label">{t('access_lists.lista_filter_label')}</label>
               <select
                 id="listas-lista-filter"
                 className="ds-select min-w-[160px]"
                 value={listaFilter}
                 onChange={(event) => setListaFilter(event.target.value as 'TODAS' | 'WHITELIST' | 'BLACKLIST')}
               >
-                <option value="TODAS">Todas</option>
-                <option value="WHITELIST">Whitelist</option>
-                <option value="BLACKLIST">Blacklist</option>
+                <option value="TODAS">{t('access_lists.lista_filter_todas')}</option>
+                <option value="WHITELIST">{t('access_lists.lista_filter_whitelist')}</option>
+                <option value="BLACKLIST">{t('access_lists.lista_filter_blacklist')}</option>
               </select>
             </div>
             <div>
-              <label htmlFor="listas-status-filter" className="ds-label">Status</label>
+              <label htmlFor="listas-status-filter" className="ds-label">{t('access_lists.status_filter_label')}</label>
               <select
                 id="listas-status-filter"
                 className="ds-select min-w-[160px]"
                 value={statusFilter}
                 onChange={(event) => setStatusFilter(event.target.value as 'TODOS' | 'ATIVOS' | 'INATIVOS')}
               >
-                <option value="TODOS">Todos</option>
-                <option value="ATIVOS">Ativos</option>
-                <option value="INATIVOS">Inativos</option>
+                <option value="TODOS">{t('access_lists.status_todos')}</option>
+                <option value="ATIVOS">{t('access_lists.status_ativos')}</option>
+                <option value="INATIVOS">{t('access_lists.status_inativos')}</option>
               </select>
             </div>
             <div>
-              <label htmlFor="listas-search-filter" className="ds-label">Buscar</label>
+              <label htmlFor="listas-search-filter" className="ds-label">{t('access_lists.search_filter_label')}</label>
               <input
                 id="listas-search-filter"
                 type="text"
                 className="ds-input min-w-[220px]"
-                placeholder="Buscar por valor, alvo ou observacao"
+                placeholder={t('access_lists.search_placeholder')}
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
               />
             </div>
           </div>
-          <p className="w-full text-sm text-warm-600 sm:w-auto">Total: {filteredListas.length} item(s)</p>
+          <p className="w-full text-sm text-warm-600 sm:w-auto">{tf('access_lists.total_items', { count: filteredListas.length })}</p>
         </div>
 
         {listasContent}
@@ -231,8 +242,8 @@ export const AccessListsPage = () => {
 
       <AdminModal
         isOpen={isCreateModalOpen}
-        title="Novo Item de Acesso"
-        subtitle="Adicione regra de whitelist ou blacklist"
+        title={t('access_lists.create_form_title')}
+        subtitle={t('access_lists.create_form_subtitle')}
         onClose={() => setIsCreateModalOpen(false)}
         isLoading={isCreateLoading}
         error={createError}
@@ -240,7 +251,7 @@ export const AccessListsPage = () => {
         <form onSubmit={criarItem} className="space-y-lg">
           <div className="grid grid-cols-2 gap-md">
             <div>
-              <label htmlFor="lista-tipo" className="ds-label">Tipo de Lista</label>
+              <label htmlFor="lista-tipo" className="ds-label">{t('access_lists.tipo_lista_label')}</label>
               <select
                 id="lista-tipo"
                 value={tipoLista}
@@ -248,13 +259,13 @@ export const AccessListsPage = () => {
                 disabled={isCreateLoading}
                 className="ds-select disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <option value="WHITELIST">WHITELIST</option>
-                <option value="BLACKLIST">BLACKLIST</option>
+                <option value="WHITELIST">{t('access_lists.lista_filter_whitelist')}</option>
+                <option value="BLACKLIST">{t('access_lists.lista_filter_blacklist')}</option>
               </select>
             </div>
 
             <div>
-              <label htmlFor="lista-alvo" className="ds-label">Tipo Alvo</label>
+              <label htmlFor="lista-alvo" className="ds-label">{t('access_lists.tipo_alvo_label')}</label>
               <select
                 id="lista-alvo"
                 value={tipoAlvo}
@@ -262,16 +273,16 @@ export const AccessListsPage = () => {
                 disabled={isCreateLoading}
                 className="ds-select disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <option value="IP">IP</option>
-                <option value="EMAIL">EMAIL</option>
-                <option value="DOMINIO">DOMINIO</option>
-                <option value="USUARIO">USUARIO</option>
+                <option value="IP">{t('access_lists.tipo_alvo_ip')}</option>
+                <option value="EMAIL">{t('access_lists.tipo_alvo_email')}</option>
+                <option value="DOMINIO">{t('access_lists.tipo_alvo_dominio')}</option>
+                <option value="USUARIO">{t('access_lists.tipo_alvo_usuario')}</option>
               </select>
             </div>
           </div>
 
           <div>
-            <label htmlFor="lista-valor" className="ds-label">Valor Alvo</label>
+            <label htmlFor="lista-valor" className="ds-label">{t('access_lists.valor_alvo_label')}</label>
             <input
               id="lista-valor"
               type="text"
@@ -280,12 +291,12 @@ export const AccessListsPage = () => {
               required
               disabled={isCreateLoading}
               className="ds-input disabled:cursor-not-allowed disabled:opacity-60"
-              placeholder={tipoAlvo === 'IP' ? 'Ex: 192.168.1.1' : 'Ex: usuario@exemplo.com'}
+              placeholder={tipoAlvo === 'IP' ? t('access_lists.valor_placeholder_ip') : t('access_lists.valor_placeholder_generic')}
             />
           </div>
 
           <div>
-            <label htmlFor="lista-obs" className="ds-label">Observacao</label>
+            <label htmlFor="lista-obs" className="ds-label">{t('access_lists.observacao_label')}</label>
             <input
               id="lista-obs"
               type="text"
@@ -293,7 +304,7 @@ export const AccessListsPage = () => {
               onChange={(e) => setObservacao(e.target.value)}
               disabled={isCreateLoading}
               className="ds-input disabled:cursor-not-allowed disabled:opacity-60"
-              placeholder="Ex: Api externa de teste"
+              placeholder={t('access_lists.observacao_placeholder')}
             />
           </div>
 
@@ -305,7 +316,7 @@ export const AccessListsPage = () => {
               disabled={isCreateLoading}
               className="h-4 w-4 accent-burnt disabled:cursor-not-allowed"
             />
-            <span className="text-sm font-semibold text-warm-800">Item ativo</span>
+            <span className="text-sm font-semibold text-warm-800">{t('access_lists.ativo_label')}</span>
           </label>
 
           <button
@@ -313,7 +324,7 @@ export const AccessListsPage = () => {
             disabled={isCreateLoading}
             className="ds-btn-primary w-full disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isCreateLoading ? 'Carregando...' : 'Criar Item'}
+              {isCreateLoading ? t('common.loading') : t('access_lists.create_button')}
           </button>
         </form>
       </AdminModal>

@@ -179,6 +179,7 @@
     "save": "Salvar",
     "delete": "Excluir",
     "edit": "Editar",
+    "actions_label": "Ações",
     "close": "Fechar",
     "search": "Buscar modulo"
   },
@@ -217,7 +218,8 @@
     "no_items": "Nenhum item encontrado",
     "error_fetch": "Falha ao carregar listas de acesso.",
     "error_create": "Não foi possível criar item de lista de acesso.",
-    "error_inativar": "Falha ao inativar item da lista."
+    "error_inativar": "Falha ao inativar item da lista.",
+    "button_inativar": "Inativar"
   },
   "access_logs": {
     "page_title": "Logs de Acesso",
