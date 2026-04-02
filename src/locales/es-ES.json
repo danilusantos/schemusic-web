@@ -19,6 +19,7 @@
     "usuarios": "Usuarios",
     "roles": "Perfiles",
     "access_control": "Control de Permisos",
+    "control_panel": "Panel de Control",
     "configuracoes": "Configuraciones del Sistema",
     "access_lists": "Listas de Acceso",
     "access_logs": "Registros de Acceso",
@@ -280,7 +281,24 @@
     ,"column_incluir": "incluir"
     ,"column_editar": "editar"
     ,"column_excluir": "excluir"
-    ,"context_admin": "Administración"
-    ,"locked_by_role": "Bloq. perfil"
+    ,"context_admin": "Administración",
+    "locked_by_role": "Bloq. perfil",
+    "catalog_title": "Catálogo de permisos",
+    "catalog_subtitle": "Cree grupos y pantallas para que los permisos aparezcan automáticamente en la gestión de perfiles y usuarios.",
+    "group_form_title": "Nuevo grupo",
+    "group_code_label": "Código del grupo",
+    "group_name_label": "Nombre del grupo",
+    "group_description_label": "Descripción del grupo",
+    "group_create_button": "Crear grupo",
+    "screen_form_title": "Nueva pantalla",
+    "screen_group_label": "Grupo",
+    "screen_code_label": "Código de la pantalla",
+    "screen_name_label": "Nombre de la pantalla",
+    "screen_description_label": "Descripción de la pantalla",
+    "screen_create_button": "Crear pantalla",
+    "catalog_empty": "Todavía no se creó ningún grupo.",
+    "catalog_group_hint": "Acciones automáticas de la pantalla: CONSULTAR, INCLUIR, EDITAR y EXCLUIR",
+    "catalog_total_groups": "Grupos",
+    "catalog_total_screens": "Pantallas"
   }
 }

@@ -242,7 +242,7 @@ export const AccessListsPage = () => {
                             {
                               label: t('access_lists.button_inativar'),
                               icon: <TrashIcon className="h-4 w-4" />,
-                              onClick: () => inativarItem(item.idListaAcesso),
+                              onClick: () => { void inativarItem(item.idListaAcesso); },
                               disabled: !item.ativo || !can('EXCLUIR'),
                               tone: 'danger',
                             },

@@ -235,7 +235,7 @@ export const RolesPage = () => {
                             {
                               label: t('roles.button_delete'),
                               icon: <TrashIcon className="h-4 w-4" />,
-                              onClick: () => excluirRole(role.idRole),
+                              onClick: () => { void excluirRole(role.idRole); },
                               disabled: !can('EXCLUIR'),
                               tone: 'danger',
                             },

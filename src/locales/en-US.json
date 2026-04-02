@@ -19,6 +19,7 @@
     "usuarios": "Users",
     "roles": "Roles",
     "access_control": "Permission Control",
+    "control_panel": "Control Panel",
     "configuracoes": "System Settings",
     "access_lists": "Access Lists",
     "access_logs": "Access Logs",
@@ -280,7 +281,24 @@
     ,"column_incluir": "create"
     ,"column_editar": "edit"
     ,"column_excluir": "delete"
-    ,"context_admin": "Administration"
-    ,"locked_by_role": "Role lock"
+    ,"context_admin": "Administration",
+    "locked_by_role": "Role lock",
+    "catalog_title": "Permission catalog",
+    "catalog_subtitle": "Create groups and screens so permissions appear automatically in role and user management.",
+    "group_form_title": "New group",
+    "group_code_label": "Group code",
+    "group_name_label": "Group name",
+    "group_description_label": "Group description",
+    "group_create_button": "Create group",
+    "screen_form_title": "New screen",
+    "screen_group_label": "Group",
+    "screen_code_label": "Screen code",
+    "screen_name_label": "Screen name",
+    "screen_description_label": "Screen description",
+    "screen_create_button": "Create screen",
+    "catalog_empty": "No groups have been created yet.",
+    "catalog_group_hint": "Automatic screen actions: VIEW, CREATE, EDIT and DELETE",
+    "catalog_total_groups": "Groups",
+    "catalog_total_screens": "Screens"
   }
 }

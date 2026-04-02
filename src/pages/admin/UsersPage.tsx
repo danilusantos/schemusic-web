@@ -319,7 +319,7 @@ export const UsersPage = () => {
                             {
                               label: user.ativo ? t('users.button_inativar') : t('users.button_ativar'),
                               icon: user.ativo ? <CloseLineIcon className="h-4 w-4" /> : <CheckLineIcon className="h-4 w-4" />,
-                              onClick: () => (user.ativo ? inativarUsuario(user.idUsuario) : ativarUsuario(user.idUsuario)),
+                              onClick: () => { void (user.ativo ? inativarUsuario(user.idUsuario) : ativarUsuario(user.idUsuario)); },
                               disabled: !can('EDITAR'),
                               tone: user.ativo ? 'danger' : 'default',
                             },

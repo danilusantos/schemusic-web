@@ -77,13 +77,44 @@ export interface AccessPermissionCatalogItem {
 }
 
 export interface AccessScreenCatalog {
+  grupoCodigo: string;
+  grupoNome: string;
   telaCodigo: string;
   telaNome: string;
   permissoes: AccessPermissionCatalogItem[];
 }
 
-export interface AccessCatalogResponse {
+export interface AccessPermissionGroup {
+  grupoCodigo: string;
+  grupoNome: string;
+  descricao?: string;
   telas: AccessScreenCatalog[];
+}
+
+export interface AccessCatalogResponse {
+  grupos: AccessPermissionGroup[];
+  telas: AccessScreenCatalog[];
+}
+
+export interface AccessPermissionGroupSummary {
+  idGrupo: number;
+  codigoGrupo: string;
+  nomeGrupo: string;
+  descricao?: string;
+  ativo: boolean;
+}
+
+export interface AccessPermissionGroupPayload {
+  codigoGrupo: string;
+  nomeGrupo: string;
+  descricao?: string;
+}
+
+export interface AccessPermissionScreenPayload {
+  codigoGrupo: string;
+  telaCodigo: string;
+  telaNome: string;
+  descricao?: string;
 }
 
 export interface AccessPermissionLink {

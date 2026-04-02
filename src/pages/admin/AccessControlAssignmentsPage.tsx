@@ -3,7 +3,7 @@ import type * as React from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLabels } from '../../context/LabelsContext';
 import { adminService } from '../../services/adminService';
-import type { AccessPermissionCatalogItem, AccessPermissionLink, AccessScreenCatalog, AdminRole, AdminUser } from '../../types/admin';
+import type { AccessPermissionCatalogItem, AccessPermissionGroup, AccessPermissionLink, AccessScreenCatalog, AdminRole, AdminUser } from '../../types/admin';
 import { AdminButton } from '../../components/admin/AdminButton';
 import { ChevronDownIcon } from '../../icons';
 
@@ -12,16 +12,15 @@ type ActionCode = 'CONSULTAR' | 'INCLUIR' | 'EDITAR' | 'EXCLUIR';
 
 const ACTIONS: ActionCode[] = ['CONSULTAR', 'INCLUIR', 'EDITAR', 'EXCLUIR'];
 
-const getContextCode = (telaCodigo: string) => {
-  const [context] = telaCodigo.split('_');
-  return context || 'GERAL';
+const getGroupCode = (screen: AccessScreenCatalog) => {
+  return screen.grupoCodigo || screen.telaCodigo.split('_')[0] || 'GERAL';
 };
 
-const getContextLabel = (contextCode: string, t: (key: string) => string) => {
-  if (contextCode === 'ADMIN') {
+const getGroupLabel = (group: AccessPermissionGroup, t: (key: string) => string) => {
+  if (group.grupoCodigo === 'ADMIN') {
     return t('access_control.context_admin');
   }
-  return contextCode;
+  return group.grupoNome || group.grupoCodigo;
 };
 
 export const AccessControlAssignmentsPage = () => {
@@ -29,7 +28,8 @@ export const AccessControlAssignmentsPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [catalog, setCatalog] = useState<AccessScreenCatalog[]>([]);
+  const [catalogGroups, setCatalogGroups] = useState<AccessPermissionGroup[]>([]);
+  const [catalogScreens, setCatalogScreens] = useState<AccessScreenCatalog[]>([]);
   const [roles, setRoles] = useState<AdminRole[]>([]);
   const [users, setUsers] = useState<AdminUser[]>([]);
 
@@ -46,28 +46,35 @@ export const AccessControlAssignmentsPage = () => {
 
   const selectedTargetLabel = target === 'user' ? t('access_control.target_user') : t('access_control.target_role');
 
+  const loadBase = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const [catalogData, rolesData, usersData] = await Promise.all([
+        adminService.listarCatalogoAcessos(),
+        adminService.listarRoles(),
+        adminService.listarUsuarios(),
+      ]);
+
+      setCatalogGroups(catalogData.grupos ?? []);
+      setCatalogScreens(catalogData.telas ?? []);
+      setRoles(rolesData);
+      setUsers(usersData);
+
+      const nextOpen: Record<string, boolean> = { ADMIN: true };
+      (catalogData.grupos ?? []).forEach((group, index) => {
+        nextOpen[group.grupoCodigo] = index === 0;
+      });
+      setOpenContexts(nextOpen);
+    } catch {
+      setError(t('access_control.error_fetch'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadBase = async () => {
-      setLoading(true);
-      setError('');
-
-      try {
-        const [catalogData, rolesData, usersData] = await Promise.all([
-          adminService.listarCatalogoAcessos(),
-          adminService.listarRoles(),
-          adminService.listarUsuarios(),
-        ]);
-
-        setCatalog(catalogData.telas);
-        setRoles(rolesData);
-        setUsers(usersData);
-      } catch {
-        setError(t('access_control.error_fetch'));
-      } finally {
-        setLoading(false);
-      }
-    };
-
     void loadBase();
   }, [t]);
 
@@ -115,15 +122,35 @@ export const AccessControlAssignmentsPage = () => {
   );
 
   const catalogByContext = useMemo(() => {
-    return catalog.reduce<Record<string, AccessScreenCatalog[]>>((acc, screen) => {
-      const contextCode = getContextCode(screen.telaCodigo);
-      if (!acc[contextCode]) {
-        acc[contextCode] = [];
+    if (catalogGroups.length > 0) {
+      return catalogGroups.reduce<Record<string, AccessScreenCatalog[]>>((acc, group) => {
+        acc[group.grupoCodigo] = group.telas ?? [];
+        return acc;
+      }, {});
+    }
+
+    return catalogScreens.reduce<Record<string, AccessScreenCatalog[]>>((acc, screen) => {
+      const groupCode = getGroupCode(screen);
+      if (!acc[groupCode]) {
+        acc[groupCode] = [];
       }
-      acc[contextCode].push(screen);
+      acc[groupCode].push(screen);
       return acc;
     }, {});
-  }, [catalog]);
+  }, [catalogGroups, catalogScreens]);
+
+  const catalogGroupEntries = useMemo(() => {
+    if (catalogGroups.length > 0) {
+      return catalogGroups;
+    }
+
+    return Object.entries(catalogByContext).map(([groupCodigo, telas]) => ({
+      grupoCodigo: groupCodigo,
+      grupoNome: groupCodigo,
+      descricao: '',
+      telas,
+    }));
+  }, [catalogByContext, catalogGroups]);
 
   const screenActionPermission = (screen: AccessScreenCatalog, action: ActionCode): AccessPermissionCatalogItem | undefined => {
     return screen.permissoes.find((permission) => permission.acaoCodigo === action);
@@ -256,8 +283,25 @@ export const AccessControlAssignmentsPage = () => {
   };
 
   const targetOptions = target === 'role' ? roles : users;
-  const contextEntries = Object.entries(catalogByContext);
+  const sortedTargetOptions = useMemo(
+    () => [...targetOptions].sort((a, b) => (a.nome || '').localeCompare(b.nome || '')),
+    [targetOptions],
+  );
 
+  const sortedContextEntries = useMemo(() => {
+    return Object.entries(catalogByContext)
+      .map(([contextCode, screens]) => [
+        contextCode,
+        [...screens].sort((a, b) => (a.telaNome || '').localeCompare(b.telaNome || '')),
+      ] as [string, AccessScreenCatalog[]])
+      .sort((a, b) => {
+        const group1 = catalogGroupEntries.find((item) => item.grupoCodigo === a[0]);
+        const group2 = catalogGroupEntries.find((item) => item.grupoCodigo === b[0]);
+        const label1 = group1 ? getGroupLabel(group1, t) : a[0];
+        const label2 = group2 ? getGroupLabel(group2, t) : b[0];
+        return label1.localeCompare(label2);
+      });
+  }, [catalogByContext, catalogGroupEntries, t]);
   const renderActionHeader = (contextCode: string, action: ActionCode) => (
     <th key={action} className="px-3 py-3 text-center font-semibold text-gray-700">
       <div className="flex items-center justify-center gap-2">
@@ -307,6 +351,7 @@ export const AccessControlAssignmentsPage = () => {
 
   const renderContextBlock = ([contextCode, screens]: [string, AccessScreenCatalog[]]) => {
     const isOpen = Boolean(openContexts[contextCode]);
+    const group = catalogGroupEntries.find((item) => item.grupoCodigo === contextCode);
 
     return (
       <div key={contextCode} className="rounded-xl border border-gray-200 bg-white overflow-hidden">
@@ -316,7 +361,7 @@ export const AccessControlAssignmentsPage = () => {
           className="flex w-full items-center justify-between px-5 py-4 text-left"
         >
           <span className="text-sm font-semibold uppercase tracking-wide text-gray-700">
-            {getContextLabel(contextCode, t)}
+            {group ? getGroupLabel(group, t) : contextCode}
           </span>
           <ChevronDownIcon className={["h-4 w-4 text-gray-500 transition-transform", isOpen ? 'rotate-180' : ''].join(' ')} />
         </button>
@@ -369,7 +414,7 @@ export const AccessControlAssignmentsPage = () => {
             <label htmlFor="access-target-id" className="ds-label">{selectedTargetLabel}</label>
             <select id="access-target-id" className="ds-select" value={selectedId || ''} onChange={handleTargetEntityChange}>
               <option value="">{target === 'role' ? t('access_control.select_role') : t('access_control.select_user')}</option>
-              {targetOptions.map((item) => (
+              {sortedTargetOptions.map((item) => (
                 <option
                   key={target === 'role' ? (item as AdminRole).idRole : (item as AdminUser).idUsuario}
                   value={target === 'role' ? (item as AdminRole).idRole : (item as AdminUser).idUsuario}
@@ -383,7 +428,7 @@ export const AccessControlAssignmentsPage = () => {
       </div>
 
       <div className="space-y-4">
-        {contextEntries.map(renderContextBlock)}
+        {sortedContextEntries.map(renderContextBlock)}
       </div>
 
       <div className="flex flex-wrap justify-end gap-3">

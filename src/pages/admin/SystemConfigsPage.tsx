@@ -195,7 +195,7 @@ export const SystemConfigsPage = () => {
                             {
                               label: t('configs.button_delete'),
                               icon: <TrashIcon className="h-4 w-4" />,
-                              onClick: () => excluirConfig(config.idConfig),
+                              onClick: () => { void excluirConfig(config.idConfig); },
                               disabled: !can('EXCLUIR'),
                               tone: 'danger',
                             },

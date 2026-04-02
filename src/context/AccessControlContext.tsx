@@ -27,6 +27,8 @@ const ADMIN_SCREEN_ROUTES = [
   { route: '/admin/access-lists', telaCodigo: 'ADMIN_ACCESS_LISTS' },
   { route: '/admin/logs', telaCodigo: 'ADMIN_ACCESS_LOGS' },
   { route: '/admin/access-control', telaCodigo: 'ADMIN_ACCESS_CONTROL' },
+  { route: '/admin/access-catalog', telaCodigo: 'ADMIN_ACCESS_CATALOG' },
+  { route: '/admin/control-panel', telaCodigo: 'ADMIN_ACCESS_CATALOG' },
 ];
 
 export const AccessControlProvider = ({ children }: { children: ReactNode }) => {

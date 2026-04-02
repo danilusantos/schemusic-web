@@ -17,12 +17,10 @@ interface AdminCardContextMenuProps {
 
 export const AdminCardContextMenu = ({ items, hideWhenAllDisabled = false }: AdminCardContextMenuProps) => {
   const [open, setOpen] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
   const hasEnabledItem = items.some((item) => !item.disabled);
-
-  if (hideWhenAllDisabled && !hasEnabledItem) {
-    return null;
-  }
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
@@ -37,9 +35,24 @@ export const AdminCardContextMenu = ({ items, hideWhenAllDisabled = false }: Adm
     };
   }, []);
 
+  useEffect(() => {
+    if (open && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setMenuPosition({
+        top: rect.bottom + window.scrollY + 8,
+        left: rect.right - 256 + window.scrollX,
+      });
+    }
+  }, [open]);
+
+  if (hideWhenAllDisabled && !hasEnabledItem) {
+    return null;
+  }
+
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={containerRef}>
       <button
+        ref={buttonRef}
         type="button"
         onClick={() => setOpen((current) => !current)}
         className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-white text-warm-700 transition hover:bg-warm-50"
@@ -49,7 +62,10 @@ export const AdminCardContextMenu = ({ items, hideWhenAllDisabled = false }: Adm
       </button>
 
       {open && (
-        <div className="absolute right-0 top-11 z-30 w-64 rounded-2xl border border-gray-200 bg-white p-2 shadow-xl shadow-gray-300/50">
+        <div 
+          className="fixed z-50 w-64 rounded-2xl border border-gray-200 bg-white p-2 shadow-xl shadow-gray-300/50"
+          style={{ top: `${menuPosition.top}px`, left: `${menuPosition.left}px` }}
+        >
           {items.map((item) => (
             <button
               key={item.label}

@@ -19,6 +19,7 @@
     "usuarios": "Usuários",
     "roles": "Perfis",
     "access_control": "Controle de Permissões",
+    "control_panel": "Painel de Controle",
     "configuracoes": "Configurações do Sistema",
     "access_lists": "Listas de Acesso",
     "access_logs": "Logs de Acesso",
@@ -280,7 +281,24 @@
     ,"column_incluir": "incluir"
     ,"column_editar": "editar"
     ,"column_excluir": "excluir"
-    ,"context_admin": "Administração"
-    ,"locked_by_role": "Bloq. perfil"
+    ,"context_admin": "Administração",
+    "locked_by_role": "Bloq. perfil",
+    "catalog_title": "Catálogo de permissões",
+    "catalog_subtitle": "Crie grupos e telas para que as permissões apareçam automaticamente na gestão de perfis e usuários.",
+    "group_form_title": "Novo grupo",
+    "group_code_label": "Código do grupo",
+    "group_name_label": "Nome do grupo",
+    "group_description_label": "Descrição do grupo",
+    "group_create_button": "Criar grupo",
+    "screen_form_title": "Nova tela",
+    "screen_group_label": "Grupo",
+    "screen_code_label": "Código da tela",
+    "screen_name_label": "Nome da tela",
+    "screen_description_label": "Descrição da tela",
+    "screen_create_button": "Criar tela",
+    "catalog_empty": "Nenhum grupo cadastrado ainda.",
+    "catalog_group_hint": "Tela automática: CONSULTAR, INCLUIR, EDITAR e EXCLUIR",
+    "catalog_total_groups": "Grupos",
+    "catalog_total_screens": "Telas"
   }
 }

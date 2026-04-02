@@ -10,6 +10,7 @@ import { RouteAccessMiddleware } from './RouteAccessMiddleware';
 import { LanguageSwitcher } from '../shared/LanguageSwitcher';
 import {
   ChevronDownIcon,
+  FolderIcon,
   GridIcon,
   ListIcon,
   LockIcon,
@@ -445,6 +446,7 @@ const LayoutContent = () => {
     { to: '/admin/users', label: t('layout.usuarios'), group: 'admin', icon: <UserCircleIcon className="h-5 w-5" /> },
     { to: '/admin/roles', label: t('layout.roles'), group: 'admin', icon: <PageIcon className="h-5 w-5" /> },
     { to: '/admin/access-control', label: t('layout.access_control'), group: 'admin', icon: <LockIcon className="h-5 w-5" /> },
+    { to: '/admin/control-panel', label: t('layout.control_panel'), group: 'admin', icon: <FolderIcon className="h-5 w-5" /> },
     { to: '/admin/configs', label: t('layout.configuracoes'), group: 'admin', icon: <TableIcon className="h-5 w-5" /> },
     { to: '/admin/access-lists', label: t('layout.access_lists'), group: 'admin', icon: <ListIcon className="h-5 w-5" /> },
     { to: '/admin/logs', label: t('layout.access_logs'), group: 'admin', icon: <PieChartIcon className="h-5 w-5" /> },
@@ -459,7 +461,9 @@ const LayoutContent = () => {
   }, [allItems, canAccessRoute, search]);
 
   const mainItems = filteredItems.filter((item) => item.group === 'main');
-  const adminItems = filteredItems.filter((item) => item.group === 'admin');
+  const adminItems = filteredItems
+    .filter((item) => item.group === 'admin')
+    .sort((a, b) => a.label.localeCompare(b.label));
   const showAccessDenied = !accessLoading && !canConsult;
 
   const desktopLeftSpacing = isExpanded || isHovered ? 'lg:ml-[280px]' : 'lg:ml-[92px]';

@@ -10,6 +10,9 @@ import type {
   AdminUser,
   AccessCatalogResponse,
   AccessLinkResponse,
+  AccessPermissionGroupPayload,
+  AccessPermissionGroupSummary,
+  AccessPermissionScreenPayload,
   CurrentScreenAccess,
   DirectUserPermissionsResponse,
 } from '../types/admin';
@@ -179,6 +182,29 @@ export const adminService = {
   listarCatalogoAcessos: async () => {
     const response = await api.get<AccessCatalogResponse>('/administration/access-control/catalog');
     return response.data;
+  },
+
+  listarGruposAcessos: async () => {
+    const response = await api.get<{ grupos: AccessPermissionGroupSummary[] }>('/administration/access-control/groups');
+    return response.data;
+  },
+
+  criarGrupoAcessos: async (payload: AccessPermissionGroupPayload) => {
+    const response = await api.put<AccessPermissionGroupSummary>('/administration/access-control/groups', payload);
+    return response.data;
+  },
+
+  criarTelaAcessos: async (payload: AccessPermissionScreenPayload) => {
+    const response = await api.put<AccessCatalogResponse>('/administration/access-control/groups/screens', payload);
+    return response.data;
+  },
+
+  deletarGrupoAcessos: async (codigoGrupo: string) => {
+    await api.delete(`/administration/access-control/groups/${codigoGrupo}`);
+  },
+
+  deletarTelaAcessos: async (codigoTela: string) => {
+    await api.delete(`/administration/access-control/screens/${codigoTela}`);
   },
 
   listarPermissoesRole: async (idRole: number) => {
