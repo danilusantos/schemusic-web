@@ -8,6 +8,10 @@ import type {
   AdminRole,
   AdminSystemConfig,
   AdminUser,
+  AccessCatalogResponse,
+  AccessLinkResponse,
+  CurrentScreenAccess,
+  DirectUserPermissionsResponse,
 } from '../types/admin';
 
 export interface AdminUserPayload {
@@ -36,6 +40,11 @@ export interface AdminAccessListPayload {
   valorAlvo: string;
   observacao?: string;
   ativo?: boolean;
+}
+
+export interface UserPermissionOverridePayload {
+  idPermissao: number;
+  permitido: boolean;
 }
 
 export const adminService = {
@@ -165,5 +174,53 @@ export const adminService = {
     userAgent: string;
   }) => {
     await api.post('/administration/access-logs/frontend-navigation', payload);
+  },
+
+  listarCatalogoAcessos: async () => {
+    const response = await api.get<AccessCatalogResponse>('/administration/access-control/catalog');
+    return response.data;
+  },
+
+  listarPermissoesRole: async (idRole: number) => {
+    const response = await api.get<AccessLinkResponse>(`/administration/access-control/roles/${idRole}`);
+    return response.data;
+  },
+
+  salvarPermissoesRole: async (idRole: number, idsPermissao: number[]) => {
+    const response = await api.put<AccessLinkResponse>(`/administration/access-control/roles/${idRole}`, {
+      idsPermissao,
+    });
+    return response.data;
+  },
+
+  listarPermissoesUsuario: async (idUsuario: number) => {
+    const response = await api.get<AccessLinkResponse>(`/administration/access-control/users/${idUsuario}`);
+    return response.data;
+  },
+
+  consultarPermissoesDiretasUsuario: async (idUsuario: number) => {
+    const response = await api.get<DirectUserPermissionsResponse>(`/administration/access-control/users/${idUsuario}/direct`);
+    return response.data;
+  },
+
+  consultarPermissoesDiretasUsuarioPorEmail: async (email: string) => {
+    const response = await api.get<DirectUserPermissionsResponse>('/administration/access-control/users/direct', {
+      params: { email },
+    });
+    return response.data;
+  },
+
+  salvarPermissoesUsuario: async (idUsuario: number, overrides: UserPermissionOverridePayload[]) => {
+    const response = await api.put<AccessLinkResponse>(`/administration/access-control/users/${idUsuario}`, {
+      overrides,
+    });
+    return response.data;
+  },
+
+  obterAcessoTelaAtual: async (params: { telaCodigo?: string; rota?: string }) => {
+    const response = await api.get<CurrentScreenAccess>('/administration/access-control/me', {
+      params,
+    });
+    return response.data;
   },
 };

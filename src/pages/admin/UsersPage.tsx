@@ -1,14 +1,19 @@
 import { useEffect, useState } from 'react';
 import type * as React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAccessControl } from '../../context/AccessControlContext';
 import { useLabels } from '../../context/LabelsContext';
 import type { LanguageCode } from '../../context/LabelsContext';
 import { adminService } from '../../services/adminService';
 import type { AdminRole, AdminUser } from '../../types/admin';
-import { CheckLineIcon, CloseLineIcon, ListIcon, PlusIcon, UserCircleIcon } from '../../icons';
+import { CheckLineIcon, CloseLineIcon, LockIcon, PlusIcon, UserCircleIcon } from '../../icons';
 import { AdminModal } from '../../components/admin/AdminModal';
+import { AdminButton } from '../../components/admin/AdminButton';
 import { AdminCardContextMenu } from '../../components/admin/AdminCardContextMenu';
 
 export const UsersPage = () => {
+  const navigate = useNavigate();
+  const { can } = useAccessControl();
   const { t, tf } = useLabels();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [roles, setRoles] = useState<AdminRole[]>([]);
@@ -78,6 +83,12 @@ export const UsersPage = () => {
 
   const criarUsuario = async (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (!can('INCLUIR')) {
+      setCreateError(t('access_control.action_denied'));
+      return;
+    }
+
     setCreateError('');
     setIsCreateLoading(true);
 
@@ -98,6 +109,11 @@ export const UsersPage = () => {
 
   const vincularRoles = async (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (!can('EDITAR')) {
+      setRolesError(t('access_control.action_denied'));
+      return;
+    }
 
     if (!selectedUserId) {
       setRolesError(t('users.error_select_user'));
@@ -147,6 +163,11 @@ export const UsersPage = () => {
   };
 
   const inativarUsuario = async (idUsuario: number) => {
+    if (!can('EDITAR')) {
+      setError(t('access_control.action_denied'));
+      return;
+    }
+
     try {
       await adminService.inativarUsuario(idUsuario);
       await carregar();
@@ -156,12 +177,31 @@ export const UsersPage = () => {
   };
 
   const ativarUsuario = async (idUsuario: number) => {
+    if (!can('EDITAR')) {
+      setError(t('access_control.action_denied'));
+      return;
+    }
+
     try {
       await adminService.ativarUsuario(idUsuario);
       await carregar();
     } catch {
       setError(t('users.error_ativar'));
     }
+  };
+
+  const abrirTelaPermissoes = (idUsuario?: number) => {
+    if (!can('EDITAR')) {
+      setError(t('access_control.action_denied'));
+      return;
+    }
+
+    if (idUsuario) {
+      navigate(`/admin/access-control?target=user&id=${idUsuario}`);
+      return;
+    }
+
+    navigate('/admin/access-control?target=user');
   };
 
   return (
@@ -186,24 +226,26 @@ export const UsersPage = () => {
             <p className="mt-1 text-sm text-gray-600">{tf('users.total_users', { count: users.length })}</p>
           </div>
 
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={openCreateModal}
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
-            >
-              <PlusIcon className="h-4 w-4" />
+          <div className="flex flex-wrap gap-2">
+            <AdminButton type="button" onClick={openCreateModal} disabled={!can('INCLUIR')} icon={<PlusIcon className="h-4 w-4" />}>
               {t('users.create_form_title')}
-            </button>
-
-            <button
-              type="button"
-              onClick={openRolesModal}
-              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              <UserCircleIcon className="h-4 w-4" />
-              {t('users.assign_form_title')}
-            </button>
+            </AdminButton>
+            <AdminCardContextMenu
+              items={[
+                {
+                  label: t('users.assign_form_title'),
+                  icon: <UserCircleIcon className="h-4 w-4" />,
+                  onClick: openRolesModal,
+                  disabled: !can('EDITAR'),
+                },
+                {
+                  label: t('access_control.user_permissions_button'),
+                  icon: <LockIcon className="h-4 w-4" />,
+                  onClick: () => abrirTelaPermissoes(),
+                  disabled: !can('EDITAR'),
+                },
+              ]}
+            />
           </div>
         </div>
 
@@ -264,25 +306,26 @@ export const UsersPage = () => {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      {user.ativo ? (
-                        <button
-                          type="button"
-                          onClick={() => inativarUsuario(user.idUsuario)}
-                          className="inline-flex items-center gap-1.5 rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 transition-colors"
-                        >
-                          <CloseLineIcon className="h-3 w-3" />
-                          {t('users.button_inativar')}
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => ativarUsuario(user.idUsuario)}
-                          className="inline-flex items-center gap-1.5 rounded-md bg-green-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-700 transition-colors"
-                        >
-                          <CheckLineIcon className="h-3 w-3" />
-                          {t('users.button_ativar')}
-                        </button>
-                      )}
+                      <div className="flex items-center justify-center">
+                        <AdminCardContextMenu
+                          hideWhenAllDisabled
+                          items={[
+                            {
+                              label: t('access_control.manage_button'),
+                              icon: <LockIcon className="h-4 w-4" />,
+                              onClick: () => abrirTelaPermissoes(user.idUsuario),
+                              disabled: !can('EDITAR'),
+                            },
+                            {
+                              label: user.ativo ? t('users.button_inativar') : t('users.button_ativar'),
+                              icon: user.ativo ? <CloseLineIcon className="h-4 w-4" /> : <CheckLineIcon className="h-4 w-4" />,
+                              onClick: () => (user.ativo ? inativarUsuario(user.idUsuario) : ativarUsuario(user.idUsuario)),
+                              disabled: !can('EDITAR'),
+                              tone: user.ativo ? 'danger' : 'default',
+                            },
+                          ]}
+                        />
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -362,13 +405,9 @@ export const UsersPage = () => {
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={isCreateLoading}
-            className="ds-btn-primary w-full disabled:cursor-not-allowed disabled:opacity-60"
-          >
+          <AdminButton type="submit" isLoading={isCreateLoading} disabled={!can('INCLUIR')} icon={<PlusIcon className="h-4 w-4" />} className="w-full">
             {isCreateLoading ? t('common.loading') : t('users.create_button')}
-          </button>
+          </AdminButton>
         </form>
       </AdminModal>
 
@@ -428,15 +467,12 @@ export const UsersPage = () => {
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={!selectedUserId || isRolesLoading}
-            className="ds-btn-primary w-full disabled:cursor-not-allowed disabled:opacity-50"
-          >
+          <AdminButton type="submit" isLoading={isRolesLoading} disabled={!selectedUserId || !can('EDITAR')} icon={<CheckLineIcon className="h-4 w-4" />} className="w-full">
             {isRolesLoading ? t('common.loading') : t('users.save_roles_button')}
-          </button>
+          </AdminButton>
         </form>
       </AdminModal>
+
     </section>
   );
 };

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Dispatch, ReactElement, SetStateAction } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAdminAuth } from '../../context/AdminAuthContext';
+import { useAccessControl } from '../../context/AccessControlContext';
 import { useLabels } from '../../context/LabelsContext';
 import { SidebarProvider, useSidebar } from '../../context/SidebarContext';
 import { adminService } from '../../services/adminService';
@@ -11,6 +12,7 @@ import {
   ChevronDownIcon,
   GridIcon,
   ListIcon,
+  LockIcon,
   MoreDotIcon,
   PageIcon,
   PieChartIcon,
@@ -175,26 +177,28 @@ const AdminHeaderBar = ({
   }, [setUserMenuOpen]);
 
   return (
-    <header className="sticky top-0 z-[60] flex w-full border-b border-gray-200 bg-white/90 backdrop-blur-xl">
-      <div className="flex w-full flex-col items-center justify-between lg:flex-row lg:px-6">
-        <div className="flex w-full items-center justify-between gap-2 border-b border-gray-200 px-3 py-3 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4">
+    <header className="sticky top-0 z-[60] flex w-full border-b border-gray-200 bg-white">
+      <div className="flex w-full items-center justify-between gap-4 px-4 py-3 sm:gap-6 lg:px-6 lg:py-4">
+        {/* Left Section */}
+        <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={onToggleSidebar}
             aria-label={isMobileOpen ? 'Fechar menu lateral' : 'Abrir menu lateral'}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:border-burnt/30 hover:bg-warm-50 hover:text-burnt-dark active:scale-95 lg:h-11 lg:w-11"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition hover:bg-gray-50 hover:text-gray-900 active:scale-95"
           >
             {isMobileOpen ? (
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path fillRule="evenodd" clipRule="evenodd" d="M6.21967 7.28131C5.92678 6.98841 5.92678 6.51354 6.21967 6.22065C6.51256 5.92775 6.98744 5.92775 7.28033 6.22065L11.999 10.9393L16.7176 6.22078C17.0105 5.92789 17.4854 5.92788 17.7782 6.22078C18.0711 6.51367 18.0711 6.98855 17.7782 7.28144L13.0597 12L17.7782 16.7186C18.0711 17.0115 18.0711 17.4863 17.7782 17.7792C17.4854 18.0721 17.0105 18.0721 16.7176 17.7792L11.999 13.0607L7.28033 17.7794C6.98744 18.0722 6.51256 18.0722 6.21967 17.7794C5.92678 17.4865 5.92678 17.0116 6.21967 16.7187L10.9384 12L6.21967 7.28131Z" fill="currentColor" />
               </svg>
             ) : (
-              <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg width="20" height="20" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path fillRule="evenodd" clipRule="evenodd" d="M0.583252 1C0.583252 0.585788 0.919038 0.25 1.33325 0.25H14.6666C15.0808 0.25 15.4166 0.585786 15.4166 1C15.4166 1.41421 15.0808 1.75 14.6666 1.75L1.33325 1.75C0.919038 1.75 0.583252 1.41422 0.583252 1ZM0.583252 11C0.583252 10.5858 0.919038 10.25 1.33325 10.25L14.6666 10.25C15.0808 10.25 15.4166 10.5858 15.4166 11C15.4166 11.4142 15.0808 11.75 14.6666 11.75L1.33325 11.75C0.919038 11.75 0.583252 11.4142 0.583252 11ZM1.33325 5.25C0.919038 5.25 0.583252 5.58579 0.583252 6C0.583252 6.41421 0.919038 6.75 1.33325 6.75L7.99992 6.75C8.41413 6.75 8.74992 6.41421 8.74992 6C8.74992 5.58579 8.41413 5.25 7.99992 5.25L1.33325 5.25Z" fill="currentColor" />
               </svg>
             )}
           </button>
-          <div className="hidden w-full max-w-md items-center md:flex">
+
+          <div className="hidden w-full max-w-xs items-center md:flex">
             <div className="relative w-full">
               <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-400">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -206,45 +210,29 @@ const AdminHeaderBar = ({
                 type="text"
                 readOnly
                 value={pathname}
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-2.5 pl-10 pr-4 text-sm text-gray-600"
+                className="w-full rounded-lg border border-gray-200 bg-gray-50 py-2 pl-9 pr-3 text-xs text-gray-600"
               />
             </div>
           </div>
         </div>
 
-        <div className="flex w-full items-center justify-end gap-2 px-3 pb-3 md:gap-3 md:px-0 md:py-0">
+        {/* Right Section */}
+        <div className="flex items-center justify-end gap-2">
+          {/* Session Timeout Widget */}
           <div
             className={[
-              'inline-flex items-center gap-2 rounded-2xl border px-3 py-2 text-[11px] font-semibold shadow-sm sm:hidden',
+              'inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium',
               isSessionExpiringSoon
-                ? 'border-amber-300 bg-amber-50 text-amber-800'
-                : 'border-gray-200 bg-white text-gray-700',
+                ? 'border-amber-200 bg-amber-50 text-amber-700'
+                : 'border-gray-200 bg-white text-gray-600',
               isSessionCritical ? 'animate-pulse' : '',
             ].join(' ')}
           >
             <span className={['h-2 w-2 rounded-full', isSessionExpiringSoon ? 'bg-amber-500' : 'bg-emerald-500'].join(' ')} />
-            {sessionCountdown}
-          </div>
-          <div
-            className={[
-              'hidden items-center gap-3 rounded-2xl border px-4 py-2 text-xs font-semibold shadow-sm sm:inline-flex',
-              isSessionExpiringSoon
-                ? 'border-amber-300 bg-gradient-to-r from-amber-50 to-white text-amber-800'
-                : 'border-gray-200 bg-gradient-to-r from-white to-gray-50 text-gray-700',
-              isSessionCritical ? 'animate-pulse' : '',
-            ].join(' ')}
-          >
-            <span className={['inline-flex h-8 w-8 items-center justify-center rounded-full border shadow-sm', isSessionExpiringSoon ? 'border-amber-200 bg-amber-100 text-amber-700' : 'border-gray-200 bg-white text-burnt-dark'].join(' ')}>
-              ⏱
-            </span>
-            <span className="leading-tight">
-              <span className="block text-[10px] font-bold uppercase tracking-[0.22em] text-gray-400">
-                {isSessionExpiringSoon ? t('layout.session_expiring_prefix') : t('layout.session_prefix')}
-              </span>
-              <span className="block text-sm font-extrabold tracking-[0.08em] text-gray-900">{sessionCountdown}</span>
-            </span>
+            <span className="hidden sm:inline">{sessionCountdown}</span>
           </div>
 
+          {/* Language Switcher */}
           <LanguageSwitcher
             value={language}
             onChange={onChangeLanguage}
@@ -258,6 +246,7 @@ const AdminHeaderBar = ({
             className="relative shrink-0"
           />
 
+          {/* User Menu */}
           <div ref={userMenuRef} className="relative">
             <button
               type="button"
@@ -265,33 +254,33 @@ const AdminHeaderBar = ({
                 setLanguageMenuOpen(false);
                 setUserMenuOpen(!userMenuOpen);
               }}
-              className="inline-flex min-h-10 items-center gap-2 rounded-2xl border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm transition hover:bg-warm-50 hover:text-gray-900"
+              className="inline-flex h-10 items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-50"
             >
-              <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-burnt/15 text-burnt-dark">
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700">
                 {(sessionName ?? 'A').charAt(0)}
               </span>
-              <span className="hidden sm:block font-semibold">{sessionName ?? t('layout.user_admin')}</span>
-              <ChevronDownIcon className="h-4 w-4 text-gray-500" />
+              <span className="hidden sm:block text-xs font-medium">{sessionName ?? t('layout.user_admin')}</span>
+              <ChevronDownIcon className="h-4 w-4 text-gray-400" />
             </button>
 
             {userMenuOpen && (
-              <div className="absolute right-0 top-full z-40 mt-2 w-64 max-w-[calc(100vw-1rem)] rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-md sm:w-56">
+              <div className="absolute right-0 top-full z-40 mt-2 w-56 rounded-lg border border-gray-200 bg-white shadow-lg">
                 <Link
                   to="/admin/users"
-                  className="block rounded-xl px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
+                  className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-t-lg"
                   onClick={() => setUserMenuOpen(false)}
                 >
                   {t('layout.user_manage')}
                 </Link>
                 <Link
                   to="/admin/configs"
-                  className="block rounded-xl px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
+                  className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
                   onClick={() => setUserMenuOpen(false)}
                 >
                   {t('layout.system_preferences')}
                 </Link>
                 <button
-                  className="mt-1 w-full rounded-xl bg-burnt px-3 py-2.5 text-left text-sm font-semibold text-white hover:bg-burnt-dark"
+                  className="mt-1 w-full rounded-b-lg bg-red-600 px-4 py-2.5 text-left text-sm font-medium text-white hover:bg-red-700"
                   type="button"
                   onClick={onLogout}
                 >
@@ -419,6 +408,7 @@ const AdminSidebar = ({
 
 const LayoutContent = () => {
   const { session, logout, updateSessionLanguage } = useAdminAuth();
+  const { loading: accessLoading, canConsult, canAccessRoute, error: accessError } = useAccessControl();
   const { t, language, setLanguage } = useLabels();
   const { isExpanded, isHovered, isMobileOpen, toggleSidebar, toggleMobileSidebar, closeMobileSidebar, setIsHovered } = useSidebar();
   const location = useLocation();
@@ -454,6 +444,7 @@ const LayoutContent = () => {
     { to: '/admin', label: t('layout.dashboard'), group: 'main', icon: <GridIcon className="h-5 w-5" /> },
     { to: '/admin/users', label: t('layout.usuarios'), group: 'admin', icon: <UserCircleIcon className="h-5 w-5" /> },
     { to: '/admin/roles', label: t('layout.roles'), group: 'admin', icon: <PageIcon className="h-5 w-5" /> },
+    { to: '/admin/access-control', label: t('layout.access_control'), group: 'admin', icon: <LockIcon className="h-5 w-5" /> },
     { to: '/admin/configs', label: t('layout.configuracoes'), group: 'admin', icon: <TableIcon className="h-5 w-5" /> },
     { to: '/admin/access-lists', label: t('layout.access_lists'), group: 'admin', icon: <ListIcon className="h-5 w-5" /> },
     { to: '/admin/logs', label: t('layout.access_logs'), group: 'admin', icon: <PieChartIcon className="h-5 w-5" /> },
@@ -461,11 +452,15 @@ const LayoutContent = () => {
 
   const filteredItems = useMemo(() => {
     const query = search.trim().toLowerCase();
-    return query ? allItems.filter((item) => item.label.toLowerCase().includes(query)) : allItems;
-  }, [allItems, search]);
+    const visibleByPermission = allItems.filter((item) => canAccessRoute(item.to));
+    return query
+      ? visibleByPermission.filter((item) => item.label.toLowerCase().includes(query))
+      : visibleByPermission;
+  }, [allItems, canAccessRoute, search]);
 
   const mainItems = filteredItems.filter((item) => item.group === 'main');
   const adminItems = filteredItems.filter((item) => item.group === 'admin');
+  const showAccessDenied = !accessLoading && !canConsult;
 
   const desktopLeftSpacing = isExpanded || isHovered ? 'lg:ml-[280px]' : 'lg:ml-[92px]';
   let sidebarWidthClass = 'w-[92px]';
@@ -565,7 +560,15 @@ const LayoutContent = () => {
 
         <main className="mx-auto max-w-screen-2xl p-4 md:p-6">
           <div className="rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm md:p-6">
-            <Outlet />
+            {accessLoading ? <div className="py-12 text-center text-sm text-gray-600">{t('common.loading')}</div> : null}
+            {!accessLoading && canConsult ? <Outlet /> : null}
+            {showAccessDenied ? (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-6">
+                <h2 className="text-lg font-semibold text-amber-900">{t('access_control.denied_title')}</h2>
+                <p className="mt-2 text-sm text-amber-800">{t('access_control.denied_description')}</p>
+                {accessError ? <p className="mt-2 text-xs text-amber-700">{t('access_control.error_fetch')}</p> : null}
+              </div>
+            ) : null}
           </div>
         </main>
       </div>

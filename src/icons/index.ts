@@ -21,6 +21,7 @@ import AudioIcon from './audio.svg?react';
 import FileIcon from './file.svg?react';
 import DownloadIcon from './download.svg?react';
 import ArrowRightIcon from './arrow-right.svg?react';
+import RefreshIcon from './refresh.svg?react';
 import GroupIcon from './group.svg?react';
 import TrashIcon from './trash.svg?react';
 import PencilIcon from './pencil.svg?react';
@@ -62,6 +63,7 @@ export {
   FileIcon,
   DownloadIcon,
   ArrowRightIcon,
+  RefreshIcon,
   GroupIcon,
   TrashIcon,
   PencilIcon,

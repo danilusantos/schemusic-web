@@ -69,3 +69,67 @@ export interface AdminAccessSeriesResponse {
   periodo: 'week' | 'month' | 'year';
   pontos: AdminAccessSeriesPoint[];
 }
+
+export interface AccessPermissionCatalogItem {
+  idPermissao: number;
+  acaoCodigo: string;
+  descricao: string;
+}
+
+export interface AccessScreenCatalog {
+  telaCodigo: string;
+  telaNome: string;
+  permissoes: AccessPermissionCatalogItem[];
+}
+
+export interface AccessCatalogResponse {
+  telas: AccessScreenCatalog[];
+}
+
+export interface AccessPermissionLink {
+  idPermissao: number;
+  telaCodigo: string;
+  acaoCodigo: string;
+  descricao: string;
+  porRole: boolean;
+  overrideUsuario?: boolean | null;
+  efetivo: boolean;
+}
+
+export interface AccessLinkResponse {
+  tipo: 'role' | 'usuario';
+  id: number;
+  permissoes: AccessPermissionLink[];
+}
+
+export interface CurrentScreenAccess {
+  idUsuario: number;
+  telaCodigo: string;
+  telaNome: string;
+  acoes: Record<string, boolean>;
+  podeConsultar: boolean;
+}
+
+export interface DirectUserPermission {
+  idPermissao: number;
+  telaCodigo: string;
+  telaNome: string;
+  acaoCodigo: string;
+  descricao: string;
+  direta: boolean;
+  porRole: boolean;
+  efetivo: boolean;
+}
+
+export interface DirectUserPermissionsResponse {
+  tipo: 'usuario_permissoes_diretas';
+  usuario: {
+    idUsuario: number;
+    nome: string;
+    email: string;
+    ativo: boolean;
+    roles: string[];
+  };
+  totalPermissoesDiretas: number;
+  permissoes: DirectUserPermission[];
+}

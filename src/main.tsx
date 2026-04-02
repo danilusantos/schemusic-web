@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
 import { AdminAuthProvider } from './context/AdminAuthContext.tsx'
+import { AccessControlProvider } from './context/AccessControlContext.tsx'
 import { LabelsProvider } from './context/LabelsContext.tsx'
 import { GlobalLoading } from './components/ui/GlobalLoading.tsx'
 
@@ -12,8 +13,10 @@ createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <LabelsProvider>
         <AdminAuthProvider>
-          <App />
-          <GlobalLoading />
+          <AccessControlProvider>
+            <App />
+            <GlobalLoading />
+          </AccessControlProvider>
         </AdminAuthProvider>
       </LabelsProvider>
     </BrowserRouter>

@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useLabels } from '../../context/LabelsContext';
 import { adminService } from '../../services/adminService';
 import type { AdminAccessLog } from '../../types/admin';
+import { RefreshIcon } from '../../icons';
+import { AdminButton } from '../../components/admin/AdminButton';
 
 const formatDate = (value: string) => {
   if (!value) {
@@ -147,13 +149,9 @@ export const AccessLogsPage = () => {
                   onChange={(e) => setLimite(Number(e.target.value))}
                   className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
-                <button
-                  type="button"
-                  onClick={() => void carregar()}
-                  className="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white hover:bg-purple-700 transition-colors"
-                >
+                <AdminButton type="button" variant="secondary" size="sm" onClick={() => void carregar()} icon={<RefreshIcon className="h-3 w-3" />}>
                   {t('access_logs.limit_button')}
-                </button>
+                </AdminButton>
               </div>
             </div>
           </div>

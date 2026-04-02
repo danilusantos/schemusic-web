@@ -1,13 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import type * as React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAccessControl } from '../../context/AccessControlContext';
 import { useLabels } from '../../context/LabelsContext';
 import { adminService } from '../../services/adminService';
 import type { AdminRole } from '../../types/admin';
-import { ListIcon, PlusIcon, TrashIcon } from '../../icons';
+import { LockIcon, PlusIcon, TrashIcon } from '../../icons';
 import { AdminModal } from '../../components/admin/AdminModal';
+import { AdminButton } from '../../components/admin/AdminButton';
 import { AdminCardContextMenu } from '../../components/admin/AdminCardContextMenu';
 
 export const RolesPage = () => {
+  const navigate = useNavigate();
+  const { can } = useAccessControl();
   const { t, tf } = useLabels();
   const [roles, setRoles] = useState<AdminRole[]>([]);
   const [nome, setNome] = useState('');
@@ -39,6 +44,12 @@ export const RolesPage = () => {
 
   const criarRole = async (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (!can('INCLUIR')) {
+      setCreateError(t('access_control.action_denied'));
+      return;
+    }
+
     setCreateError('');
     setIsCreateLoading(true);
 
@@ -57,6 +68,11 @@ export const RolesPage = () => {
   };
 
   const excluirRole = async (idRole: number) => {
+    if (!can('EXCLUIR')) {
+      setError(t('access_control.action_denied'));
+      return;
+    }
+
     try {
       await adminService.excluirRole(idRole);
       await carregar();
@@ -83,6 +99,20 @@ export const RolesPage = () => {
     });
   }, [roles, search, statusFilter]);
 
+  const abrirTelaPermissoes = (idRole?: number) => {
+    if (!can('EDITAR')) {
+      setError(t('access_control.action_denied'));
+      return;
+    }
+
+    if (idRole) {
+      navigate(`/admin/access-control?target=role&id=${idRole}`);
+      return;
+    }
+
+    navigate('/admin/access-control?target=role');
+  };
+
   return (
     <section className="space-y-8">
       {error && (
@@ -107,14 +137,21 @@ export const RolesPage = () => {
               <p className="mt-1 text-sm text-gray-600">{tf('roles.total_roles', { count: filteredRoles.length })}</p>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setIsCreateModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
-            >
-              <PlusIcon className="h-4 w-4" />
-              {t('roles.create_form_title')}
-            </button>
+            <div className="flex items-center gap-2">
+              <AdminButton type="button" onClick={() => setIsCreateModalOpen(true)} disabled={!can('INCLUIR')} icon={<PlusIcon className="h-4 w-4" />}>
+                {t('roles.create_form_title')}
+              </AdminButton>
+              <AdminCardContextMenu
+                items={[
+                  {
+                    label: t('access_control.role_permissions_button'),
+                    icon: <LockIcon className="h-4 w-4" />,
+                    onClick: () => abrirTelaPermissoes(),
+                    disabled: !can('EDITAR'),
+                  },
+                ]}
+              />
+            </div>
           </div>
 
           {/* Filters */}
@@ -185,14 +222,26 @@ export const RolesPage = () => {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <button
-                        type="button"
-                        onClick={() => excluirRole(role.idRole)}
-                        className="inline-flex items-center gap-1.5 rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 transition-colors"
-                      >
-                        <TrashIcon className="h-3 w-3" />
-                        {t('roles.button_delete')}
-                      </button>
+                      <div className="flex items-center justify-center">
+                        <AdminCardContextMenu
+                          hideWhenAllDisabled
+                          items={[
+                            {
+                              label: t('access_control.manage_button'),
+                              icon: <LockIcon className="h-4 w-4" />,
+                              onClick: () => abrirTelaPermissoes(role.idRole),
+                              disabled: !can('EDITAR'),
+                            },
+                            {
+                              label: t('roles.button_delete'),
+                              icon: <TrashIcon className="h-4 w-4" />,
+                              onClick: () => excluirRole(role.idRole),
+                              disabled: !can('EXCLUIR'),
+                              tone: 'danger',
+                            },
+                          ]}
+                        />
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -205,6 +254,7 @@ export const RolesPage = () => {
       <AdminModal
         isOpen={isCreateModalOpen}
         title={t('roles.create_form_title')}
+        titleIcon={<PlusIcon className="h-5 w-5" />}
         subtitle={t('roles.create_form_subtitle')}
         onClose={() => setIsCreateModalOpen(false)}
         isLoading={isCreateLoading}
@@ -251,13 +301,9 @@ export const RolesPage = () => {
             </label>
           </div>
 
-          <button
-            type="submit"
-            disabled={isCreateLoading}
-            className="ds-btn-primary w-full disabled:cursor-not-allowed disabled:opacity-60"
-          >
-              {isCreateLoading ? t('common.loading') : t('roles.create_button')}
-          </button>
+          <AdminButton type="submit" isLoading={isCreateLoading} disabled={!can('INCLUIR')} icon={<PlusIcon className="h-4 w-4" />} className="w-full">
+            {isCreateLoading ? t('common.loading') : t('roles.create_button')}
+          </AdminButton>
         </form>
       </AdminModal>
     </section>

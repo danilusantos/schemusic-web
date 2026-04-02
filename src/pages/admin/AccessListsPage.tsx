@@ -1,12 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import type * as React from 'react';
+import { useAccessControl } from '../../context/AccessControlContext';
 import { useLabels } from '../../context/LabelsContext';
 import { adminService } from '../../services/adminService';
 import type { AdminAccessList } from '../../types/admin';
 import { PlusIcon, TrashIcon } from '../../icons';
 import { AdminModal } from '../../components/admin/AdminModal';
+import { AdminButton } from '../../components/admin/AdminButton';
+import { AdminCardContextMenu } from '../../components/admin/AdminCardContextMenu';
 
 export const AccessListsPage = () => {
+  const { can } = useAccessControl();
   const { t, tf } = useLabels();
   const [listas, setListas] = useState<AdminAccessList[]>([]);
   const [tipoLista, setTipoLista] = useState('WHITELIST');
@@ -51,6 +55,12 @@ export const AccessListsPage = () => {
 
   const criarItem = async (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (!can('INCLUIR')) {
+      setCreateError(t('access_control.action_denied'));
+      return;
+    }
+
     setCreateError('');
     setIsCreateLoading(true);
 
@@ -75,6 +85,11 @@ export const AccessListsPage = () => {
   };
 
   const inativarItem = async (idListaAcesso: number) => {
+    if (!can('EXCLUIR')) {
+      setError(t('access_control.action_denied'));
+      return;
+    }
+
     try {
       await adminService.inativarListaAcesso(idListaAcesso);
       await carregar();
@@ -120,14 +135,9 @@ export const AccessListsPage = () => {
               <p className="mt-1 text-sm text-gray-600">{tf('access_lists.total_items', { count: filteredListas.length })}</p>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setIsCreateModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 transition-colors"
-            >
-              <PlusIcon className="h-4 w-4" />
+            <AdminButton type="button" onClick={() => setIsCreateModalOpen(true)} disabled={!can('INCLUIR')} icon={<PlusIcon className="h-4 w-4" />}>
               {t('access_lists.create_form_title')}
-            </button>
+            </AdminButton>
           </div>
 
           {/* Filters */}
@@ -225,15 +235,20 @@ export const AccessListsPage = () => {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <button
-                        type="button"
-                        onClick={() => inativarItem(item.idListaAcesso)}
-                        disabled={!item.ativo}
-                        className="inline-flex items-center gap-1.5 rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        <TrashIcon className="h-3 w-3" />
-                        {t('access_lists.button_inativar')}
-                      </button>
+                      <div className="flex items-center justify-center">
+                        <AdminCardContextMenu
+                          hideWhenAllDisabled
+                          items={[
+                            {
+                              label: t('access_lists.button_inativar'),
+                              icon: <TrashIcon className="h-4 w-4" />,
+                              onClick: () => inativarItem(item.idListaAcesso),
+                              disabled: !item.ativo || !can('EXCLUIR'),
+                              tone: 'danger',
+                            },
+                          ]}
+                        />
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -322,13 +337,9 @@ export const AccessListsPage = () => {
             <span className="text-sm font-semibold text-warm-800">{t('access_lists.ativo_label')}</span>
           </label>
 
-          <button
-            type="submit"
-            disabled={isCreateLoading}
-            className="ds-btn-primary w-full disabled:cursor-not-allowed disabled:opacity-60"
-          >
-              {isCreateLoading ? t('common.loading') : t('access_lists.create_button')}
-          </button>
+          <AdminButton type="submit" isLoading={isCreateLoading} disabled={!can('INCLUIR')} icon={<PlusIcon className="h-4 w-4" />} className="w-full">
+            {isCreateLoading ? t('common.loading') : t('access_lists.create_button')}
+          </AdminButton>
         </form>
       </AdminModal>
     </section>

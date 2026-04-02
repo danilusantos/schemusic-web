@@ -10,6 +10,7 @@ const RolesPage = lazy(() => import('./pages/admin/RolesPage').then((module) => 
 const SystemConfigsPage = lazy(() => import('./pages/admin/SystemConfigsPage').then((module) => ({ default: module.SystemConfigsPage })));
 const AccessListsPage = lazy(() => import('./pages/admin/AccessListsPage').then((module) => ({ default: module.AccessListsPage })));
 const AccessLogsPage = lazy(() => import('./pages/admin/AccessLogsPage').then((module) => ({ default: module.AccessLogsPage })));
+const AccessControlAssignmentsPage = lazy(() => import('./pages/admin/AccessControlAssignmentsPage').then((module) => ({ default: module.AccessControlAssignmentsPage })));
 
 const routeFallback = (
   <div className="mx-auto flex min-h-[40vh] max-w-screen-2xl items-center justify-center p-6">
@@ -34,6 +35,7 @@ function App() {
             <Route path="configs" element={<SystemConfigsPage />} />
             <Route path="access-lists" element={<AccessListsPage />} />
             <Route path="logs" element={<AccessLogsPage />} />
+            <Route path="access-control" element={<AccessControlAssignmentsPage />} />
           </Route>
         </Route>
 

@@ -9,12 +9,16 @@
     "error_no_connection": "Failed to connect to the API. If running locally, check CORS/proxy and backend status.",
     "error_invalid_credentials": "Invalid administrator credentials.",
     "error_auth_failed": "Authentication error (HTTP {status}).",
-    "error_generic": "Unable to authenticate. Check credentials and API."
+    "error_generic": "Unable to authenticate. Check credentials and API.",
+    "no_access_title": "No system access",
+    "no_access_message": "No system access. Please contact administration.",
+    "no_access_close": "Close"
   },
   "layout": {
     "dashboard": "Dashboard",
     "usuarios": "Users",
     "roles": "Roles",
+    "access_control": "Permission Control",
     "configuracoes": "System Settings",
     "access_lists": "Access Lists",
     "access_logs": "Access Logs",
@@ -245,5 +249,38 @@
     "total_logs": "Total: {count} log(s)",
     "no_logs": "No logs found",
     "error_fetch": "Failed to load access logs."
+  },
+  "access_control": {
+    "denied_title": "Access not authorized for this screen",
+    "denied_description": "You do not have query permission to view this content.",
+    "error_fetch": "Could not load permissions for the current screen.",
+    "action_denied": "You do not have permission to perform this action.",
+    "role_permissions_button": "Role Permissions",
+    "role_permissions_title": "Role Permissions",
+    "role_permissions_subtitle": "Select a role and define allowed actions per screen.",
+    "user_permissions_button": "User Permissions",
+    "user_permissions_title": "User Permissions",
+    "user_permissions_subtitle": "Define permission overrides for a specific user.",
+    "select_role": "Select a role",
+    "select_user": "Select a user",
+    "override_inherit": "Inherit from role",
+    "override_allow": "Allow",
+    "override_deny": "Deny",
+    "inherited_yes": "Inherited: yes",
+    "inherited_no": "Inherited: no",
+    "error_save": "Could not save permissions."
+    ,"manage_button": "Manage"
+    ,"page_title": "Permission Control"
+    ,"page_subtitle": "Manage permissions by role and by user in one screen."
+    ,"target_label": "Apply to"
+    ,"target_role": "Role"
+    ,"target_user": "User"
+    ,"column_screen": "SCREEN"
+    ,"column_consultar": "view"
+    ,"column_incluir": "create"
+    ,"column_editar": "edit"
+    ,"column_excluir": "delete"
+    ,"context_admin": "Administration"
+    ,"locked_by_role": "Role lock"
   }
 }

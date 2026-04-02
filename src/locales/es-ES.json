@@ -9,12 +9,16 @@
     "error_no_connection": "Error de conexión con la API. Si está en local, verifique CORS/proxy y backend activo.",
     "error_invalid_credentials": "Credenciales de administrador inválidas.",
     "error_auth_failed": "Error de autenticación (HTTP {status}).",
-    "error_generic": "No fue posible autenticar. Verifique credenciales y API."
+    "error_generic": "No fue posible autenticar. Verifique credenciales y API.",
+    "no_access_title": "Sin acceso al sistema",
+    "no_access_message": "Sin acceso al sistema. Por favor, póngase en contacto con la administración.",
+    "no_access_close": "Cerrar"
   },
   "layout": {
     "dashboard": "Dashboard",
     "usuarios": "Usuarios",
     "roles": "Perfiles",
+    "access_control": "Control de Permisos",
     "configuracoes": "Configuraciones del Sistema",
     "access_lists": "Listas de Acceso",
     "access_logs": "Registros de Acceso",
@@ -245,5 +249,38 @@
     "total_logs": "Total: {count} log(s)",
     "no_logs": "No se encontró ningún log",
     "error_fetch": "Error al cargar logs de acceso."
+  },
+  "access_control": {
+    "denied_title": "Acceso no autorizado para esta pantalla",
+    "denied_description": "No tiene permiso de consulta para ver este contenido.",
+    "error_fetch": "No se pudieron cargar los permisos de la pantalla actual.",
+    "action_denied": "No tiene permiso para ejecutar esta acción.",
+    "role_permissions_button": "Permisos del Role",
+    "role_permissions_title": "Permisos por Role",
+    "role_permissions_subtitle": "Seleccione un role y defina acciones permitidas por pantalla.",
+    "user_permissions_button": "Permisos del Usuario",
+    "user_permissions_title": "Permisos por Usuario",
+    "user_permissions_subtitle": "Defina sobrescrituras de permisos para un usuario específico.",
+    "select_role": "Seleccione un role",
+    "select_user": "Seleccione un usuario",
+    "override_inherit": "Heredar del role",
+    "override_allow": "Permitir",
+    "override_deny": "Denegar",
+    "inherited_yes": "Heredado: sí",
+    "inherited_no": "Heredado: no",
+    "error_save": "No se pudieron guardar los permisos."
+    ,"manage_button": "Gestionar"
+    ,"page_title": "Control de Permisos"
+    ,"page_subtitle": "Gestione permisos por perfil y por usuario en una sola pantalla."
+    ,"target_label": "Aplicar en"
+    ,"target_role": "Perfil"
+    ,"target_user": "Usuario"
+    ,"column_screen": "PANTALLA"
+    ,"column_consultar": "consultar"
+    ,"column_incluir": "incluir"
+    ,"column_editar": "editar"
+    ,"column_excluir": "excluir"
+    ,"context_admin": "Administración"
+    ,"locked_by_role": "Bloq. perfil"
   }
 }

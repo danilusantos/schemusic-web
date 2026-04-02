@@ -1,12 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import type * as React from 'react';
+import { useAccessControl } from '../../context/AccessControlContext';
 import { useLabels } from '../../context/LabelsContext';
 import { adminService } from '../../services/adminService';
 import type { AdminSystemConfig } from '../../types/admin';
 import { PlusIcon, TrashIcon } from '../../icons';
 import { AdminModal } from '../../components/admin/AdminModal';
+import { AdminButton } from '../../components/admin/AdminButton';
+import { AdminCardContextMenu } from '../../components/admin/AdminCardContextMenu';
 
 export const SystemConfigsPage = () => {
+  const { can } = useAccessControl();
   const { t, tf } = useLabels();
   const [configs, setConfigs] = useState<AdminSystemConfig[]>([]);
   const [chave, setChave] = useState('');
@@ -39,6 +43,12 @@ export const SystemConfigsPage = () => {
 
   const criarConfig = async (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (!can('INCLUIR')) {
+      setCreateError(t('access_control.action_denied'));
+      return;
+    }
+
     setCreateError('');
     setIsCreateLoading(true);
 
@@ -58,6 +68,11 @@ export const SystemConfigsPage = () => {
   };
 
   const excluirConfig = async (idConfig: number) => {
+    if (!can('EXCLUIR')) {
+      setError(t('access_control.action_denied'));
+      return;
+    }
+
     try {
       await adminService.excluirConfig(idConfig);
       await carregar();
@@ -109,14 +124,9 @@ export const SystemConfigsPage = () => {
               <p className="mt-1 text-sm text-gray-600">{tf('configs.total_configs', { count: filteredConfigs.length })}</p>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setIsCreateModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
-            >
-              <PlusIcon className="h-4 w-4" />
+            <AdminButton type="button" onClick={() => setIsCreateModalOpen(true)} disabled={!can('INCLUIR')} icon={<PlusIcon className="h-4 w-4" />}>
               {t('configs.create_form_title')}
-            </button>
+            </AdminButton>
           </div>
 
           {/* Filters */}
@@ -178,14 +188,20 @@ export const SystemConfigsPage = () => {
                     <td className="px-4 py-3 font-mono text-xs text-gray-600 max-w-xs truncate" title={config.valor}>{config.valor}</td>
                     <td className="px-4 py-3 text-sm text-gray-600">{config.descricao || '-'}</td>
                     <td className="px-4 py-3 text-center">
-                      <button
-                        type="button"
-                        onClick={() => excluirConfig(config.idConfig)}
-                        className="inline-flex items-center gap-1.5 rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 transition-colors"
-                      >
-                        <TrashIcon className="h-3 w-3" />
-                        {t('configs.button_delete')}
-                      </button>
+                      <div className="flex items-center justify-center">
+                        <AdminCardContextMenu
+                          hideWhenAllDisabled
+                          items={[
+                            {
+                              label: t('configs.button_delete'),
+                              icon: <TrashIcon className="h-4 w-4" />,
+                              onClick: () => excluirConfig(config.idConfig),
+                              disabled: !can('EXCLUIR'),
+                              tone: 'danger',
+                            },
+                          ]}
+                        />
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -258,13 +274,9 @@ export const SystemConfigsPage = () => {
             </label>
           </div>
 
-          <button
-            type="submit"
-            disabled={isCreateLoading}
-            className="ds-btn-primary w-full disabled:cursor-not-allowed disabled:opacity-60"
-          >
-              {isCreateLoading ? t('common.loading') : t('configs.create_button')}
-          </button>
+          <AdminButton type="submit" isLoading={isCreateLoading} disabled={!can('INCLUIR')} icon={<PlusIcon className="h-4 w-4" />} className="w-full">
+            {isCreateLoading ? t('common.loading') : t('configs.create_button')}
+          </AdminButton>
         </form>
       </AdminModal>
     </section>

@@ -1,8 +1,10 @@
 import type { ReactNode } from 'react';
+import { CloseIcon } from '../../icons';
 
 interface AdminModalProps {
   isOpen: boolean;
   title: string;
+  titleIcon?: ReactNode;
   subtitle?: string;
   onClose: () => void;
   children: ReactNode;
@@ -13,6 +15,7 @@ interface AdminModalProps {
 export const AdminModal = ({
   isOpen,
   title,
+  titleIcon,
   subtitle,
   onClose,
   children,
@@ -36,7 +39,10 @@ export const AdminModal = ({
       <div className="relative z-10 w-full max-w-2xl rounded-2xl bg-white p-6 shadow-theme-md">
         <div className="mb-5 flex items-start justify-between gap-3">
           <div>
-            <h3 className="text-xl font-bold text-warm-900">{title}</h3>
+            <div className="flex items-center gap-2">
+              {titleIcon && <span className="text-gray-500">{titleIcon}</span>}
+              <h3 className="text-xl font-bold text-warm-900">{title}</h3>
+            </div>
             {subtitle && <p className="mt-1 text-sm text-warm-600">{subtitle}</p>}
           </div>
           <button
@@ -45,7 +51,7 @@ export const AdminModal = ({
             onClick={onClose}
             disabled={isLoading}
           >
-            <span className="text-lg leading-none">×</span>
+            <CloseIcon className="h-4 w-4" />
           </button>
         </div>
 
