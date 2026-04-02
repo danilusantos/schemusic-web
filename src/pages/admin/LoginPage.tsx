@@ -26,13 +26,9 @@ export const LoginPage = () => {
 
   const hasAtLeastOneConsultarAccess = async () => {
     try {
-      const catalog = await adminService.listarCatalogoAcessos();
-
-      const settled = await Promise.allSettled(
-        catalog.telas.map((screen) => adminService.obterAcessoTelaAtual({ telaCodigo: screen.telaCodigo })),
-      );
-
-      return settled.some((result) => result.status === 'fulfilled' && Boolean(result.value.podeConsultar));
+      // Verificar se tem acesso consultando uma tela crítica
+      await adminService.obterAcessoTelaAtual({ rota: '/admin' });
+      return true;
     } catch {
       return false;
     }

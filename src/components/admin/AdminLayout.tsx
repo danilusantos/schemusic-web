@@ -10,7 +10,6 @@ import { RouteAccessMiddleware } from './RouteAccessMiddleware';
 import { LanguageSwitcher } from '../shared/LanguageSwitcher';
 import {
   ChevronDownIcon,
-  FolderIcon,
   GridIcon,
   ListIcon,
   LockIcon,
@@ -401,6 +400,8 @@ const AdminSidebar = ({
               )}
             </div>
           )}
+
+
         </div>
       </nav>
     </div>
@@ -421,6 +422,9 @@ const LayoutContent = () => {
   const { sessionCountdown, isSessionExpiringSoon, isSessionCritical } = useSessionCountdown();
 
   usePreferredLanguageSync(session?.idiomaPadrao, language, setLanguage);
+
+  // Carregar catálogo de permissões dinâmicas
+
 
   const handleLanguageChange = async (selectedLanguage: LanguageCode) => {
     setLanguage(selectedLanguage);
@@ -446,7 +450,6 @@ const LayoutContent = () => {
     { to: '/admin/users', label: t('layout.usuarios'), group: 'admin', icon: <UserCircleIcon className="h-5 w-5" /> },
     { to: '/admin/roles', label: t('layout.roles'), group: 'admin', icon: <PageIcon className="h-5 w-5" /> },
     { to: '/admin/access-control', label: t('layout.access_control'), group: 'admin', icon: <LockIcon className="h-5 w-5" /> },
-    { to: '/admin/control-panel', label: t('layout.control_panel'), group: 'admin', icon: <FolderIcon className="h-5 w-5" /> },
     { to: '/admin/configs', label: t('layout.configuracoes'), group: 'admin', icon: <TableIcon className="h-5 w-5" /> },
     { to: '/admin/access-lists', label: t('layout.access_lists'), group: 'admin', icon: <ListIcon className="h-5 w-5" /> },
     { to: '/admin/logs', label: t('layout.access_logs'), group: 'admin', icon: <PieChartIcon className="h-5 w-5" /> },
